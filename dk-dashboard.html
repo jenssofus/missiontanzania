@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Tanzania — Sponsor Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1F1A14;
+    --paper: #F4EEE2;
+    --paper-deep: #E9E0CD;
+    --card: #FFFCF5;
+    --acacia: #3A6B47;
+    --acacia-deep: #2A4F35;
+    --clay: #B5562A;
+    --clay-deep: #8E3F1C;
+    --gold: #C99A3E;
+    --muted: #7A7060;
+    --line: #D6CAB0;
+    --shadow: rgba(31,26,20,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(58,107,71,0.05) 0%, transparent 40%),
+      radial-gradient(circle at 88% 82%, rgba(181,86,42,0.05) 0%, transparent 40%);
+  }
+
+  /* ---------- LOGIN GATE ---------- */
+  #loginGate {
+    position: fixed;
+    inset: 0;
+    background: var(--acacia-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(201,154,62,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(181,86,42,0.12) 0%, transparent 50%);
+  }
+
+  .login-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 44px 38px;
+    width: 340px;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  }
+
+  .login-mark {
+    width: 56px; height: 56px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--acacia);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+
+  .login-card h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 21px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .login-card p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .login-card input {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .login-card input:focus { border-color: var(--acacia); }
+
+  .login-card button {
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    background: var(--acacia);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .login-card button:hover { background: var(--acacia-deep); }
+
+  .login-error {
+    color: var(--clay);
+    font-size: 12px;
+    margin-top: 12px;
+    min-height: 16px;
+  }
+
+  /* ---------- HEADER ---------- */
+  .topbar {
+    background: var(--acacia-deep);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+
+  .topbar-mark {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px;
+  }
+
+  .topbar-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .topbar-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .topbar-stats {
+    display: flex;
+    gap: 22px;
+  }
+
+  .stat { text-align: right; }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  .page-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .page-head h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+  }
+
+  .refresh-btn {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.2s;
+  }
+
+  .refresh-btn:hover { border-color: var(--acacia); color: var(--acacia); }
+
+  .page-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  /* ---------- REPORT CARDS ---------- */
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 18px;
+  }
+
+  .report-card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    box-shadow: 0 2px 10px var(--shadow);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .report-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 26px var(--shadow);
+  }
+
+  .card-top {
+    padding: 16px 18px 14px;
+    background: linear-gradient(135deg, var(--acacia) 0%, var(--acacia-deep) 100%);
+    color: #fff;
+    position: relative;
+  }
+
+  .card-child-name {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .card-meta {
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 3px;
+  }
+
+  .card-body { padding: 16px 18px; flex: 1; }
+
+  .info-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 11px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .info-row:last-child { margin-bottom: 0; }
+
+  .info-icon {
+    flex-shrink: 0;
+    width: 22px;
+    text-align: center;
+  }
+
+  .info-label {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 1px;
+  }
+
+  .info-val { color: var(--ink); }
+
+  .quote-block {
+    background: var(--paper-deep);
+    border-left: 3px solid var(--gold);
+    padding: 10px 12px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  .quote-label {
+    display: block;
+    font-style: normal;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--clay-deep);
+    margin-bottom: 3px;
+    font-weight: 500;
+  }
+
+  .card-foot {
+    padding: 14px 18px;
+    border-top: 1px solid var(--line);
+  }
+
+  .compose-btn {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 9px;
+    background: var(--clay);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .compose-btn:hover { background: var(--clay-deep); }
+
+  /* ---------- HEALTH PILL ---------- */
+  .pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .pill-good { background: #DCEBD8; color: #2A4F35; }
+  .pill-mid { background: #F5E6C8; color: #8A6516; }
+  .pill-low { background: #F0D4C4; color: #8E3F1C; }
+
+  /* ---------- LOADING / EMPTY ---------- */
+  .state-msg {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .state-msg .big {
+    font-size: 34px;
+    margin-bottom: 10px;
+  }
+  .state-msg .txt {
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 34px; height: 34px;
+    border: 3px solid var(--line);
+    border-top-color: var(--acacia);
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- MODAL / EMAIL COMPOSER ---------- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(31,26,20,0.55);
+    z-index: 500;
+    padding: 30px 20px;
+    overflow-y: auto;
+  }
+
+  .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+
+  .modal {
+    background: var(--paper);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 880px;
+    overflow: hidden;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+  }
+
+  .modal-head {
+    background: var(--acacia-deep);
+    color: #fff;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-head h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.28); }
+
+  .modal-body {
+    padding: 22px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+
+  .composer-col label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    margin-bottom: 5px;
+    margin-top: 14px;
+    font-weight: 500;
+  }
+  .composer-col label:first-child { margin-top: 0; }
+
+  .composer-col input,
+  .composer-col select,
+  .composer-col textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    background: var(--card);
+    outline: none;
+  }
+  .composer-col input:focus,
+  .composer-col textarea:focus,
+  .composer-col select:focus { border-color: var(--acacia); }
+
+  .composer-col textarea {
+    min-height: 220px;
+    resize: vertical;
+    line-height: 1.55;
+  }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  .ref-box {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .ref-box h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    margin-bottom: 8px;
+    color: var(--acacia-deep);
+  }
+  .ref-item { margin-bottom: 7px; }
+  .ref-item strong { color: var(--clay-deep); font-weight: 500; }
+
+  .preview-frame {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    margin-top: 10px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .modal-foot {
+    padding: 16px 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--paper-deep);
+  }
+
+  .lang-toggle {
+    display: flex;
+    gap: 6px;
+  }
+  .lang-toggle button {
+    padding: 6px 14px;
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    border-radius: 7px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .lang-toggle button.active {
+    background: var(--acacia);
+    color: #fff;
+    border-color: var(--acacia);
+  }
+
+  .foot-actions { display: flex; gap: 10px; }
+
+  .btn-secondary {
+    padding: 10px 18px;
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    border-radius: 9px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .btn-send {
+    padding: 10px 22px;
+    border: none;
+    background: var(--clay);
+    color: #fff;
+    border-radius: 9px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-send:hover { background: var(--clay-deep); }
+  .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--acacia-deep);
+    color: #fff;
+    padding: 13px 24px;
+    border-radius: 10px;
+    font-size: 13px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transition: transform 0.35s ease;
+    z-index: 800;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 720px) {
+    .modal-body { grid-template-columns: 1fr; }
+    .topbar-stats { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN GATE ============ -->
+<div id="loginGate">
+  <div class="login-card">
+    <div class="login-mark">🌍</div>
+    <h1>Mission Tanzania</h1>
+    <p>Sponsor Dashboard · Kun for DK-teamet</p>
+    <input type="password" id="pwInput" maxlength="8" placeholder="••••" inputmode="numeric" />
+    <button onclick="checkLogin()">Log ind</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ============ HEADER ============ -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-mark">🌍</div>
+    <div>
+      <div class="topbar-title">Mission Tanzania</div>
+      <div class="topbar-sub">Sponsor Dashboard · Betania Kirkecenter</div>
+    </div>
+  </div>
+  <div class="topbar-stats">
+    <div class="stat">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Rapporter</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN ============ -->
+<div class="wrap">
+  <div class="page-head">
+    <h2>Børnerapporter</h2>
+    <button class="refresh-btn" onclick="loadReports()">↻ Opdater</button>
+  </div>
+  <div class="page-sub">Rapporter indsendt af TZ-teamet. Vælg et barn for at skrive en personlig opdatering til sponsoren.</div>
+
+  <div id="reportsArea">
+    <div class="state-msg">
+      <div class="spinner"></div>
+      <div class="txt">Henter rapporter…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EMAIL COMPOSER MODAL ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Skriv opdatering</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- LEFT: composer -->
+      <div class="composer-col">
+        <label>Modtagerens navn</label>
+        <input type="text" id="recipientName" placeholder="Sponsorens navn" />
+        <div class="hint">Hvis barnet har flere sponsorer, ret blot navnet og send igen.</div>
+
+        <label>Modtagerens email</label>
+        <input type="email" id="recipientEmail" placeholder="sponsor@email.dk" />
+
+        <label>Emne</label>
+        <input type="text" id="emailSubject" />
+
+        <label>Personlig besked</label>
+        <textarea id="personalMessage" placeholder="Skriv en personlig opdatering om barnet til sponsoren…"></textarea>
+        <div class="hint">Skriv personligt. Skabelonen tilføjer automatisk top, billeder og bundtekst.</div>
+      </div>
+
+      <!-- RIGHT: reference + preview -->
+      <div class="composer-col">
+        <div class="ref-box" id="refBox">
+          <h4>Oplysninger fra TZ-teamet</h4>
+          <div id="refContent"></div>
+        </div>
+        <label>Forhåndsvisning af email</label>
+        <div class="preview-frame">
+          <iframe id="previewFrame" style="width:100%;height:300px;border:none;"></iframe>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <div class="lang-toggle">
+        <button id="langDA" class="active" onclick="setLang('da')">Dansk</button>
+        <button id="langEN" onclick="setLang('en')">English</button>
+      </div>
+      <div class="foot-actions">
+        <button class="btn-secondary" onclick="refreshPreview()">↻ Opdater visning</button>
+        <button class="btn-send" id="sendBtn" onclick="sendEmail()">✉ Send email</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ============================================================
+  // CONFIG
+  // ============================================================
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxj-nQP1vdBAdDdrUtMRYJDZjYocDVNGHNpy73LKl785DCSNkENhvjJDIc65ZWIrS-L/exec";
+  const DASHBOARD_PASSWORD = "1235";
+
+  let allReports = [];
+  let currentReport = null;
+  let currentLang = 'da';
+
+  // ============================================================
+  // LOGIN
+  // ============================================================
+  function checkLogin() {
+    const val = document.getElementById('pwInput').value;
+    if (val === DASHBOARD_PASSWORD) {
+      document.getElementById('loginGate').style.display = 'none';
+      loadReports();
+    } else {
+      document.getElementById('loginError').textContent = 'Forkert kode. Prøv igen.';
+      document.getElementById('pwInput').value = '';
+    }
+  }
+
+  document.getElementById('pwInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkLogin();
+  });
+
+  // ============================================================
+  // LOAD REPORTS
+  // ============================================================
+  async function loadReports() {
+    const area = document.getElementById('reportsArea');
+    area.innerHTML = '<div class="state-msg"><div class="spinner"></div><div class="txt">Henter rapporter…</div></div>';
+
+    try {
+      const res = await fetch(APPS_SCRIPT_URL);
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        allReports = data.reports || [];
+        renderReports();
+      } else {
+        area.innerHTML = '<div class="state-msg"><div class="big">⚠️</div><div class="txt">Kunne ikke hente data.</div></div>';
+      }
+    } catch (err) {
+      area.innerHTML = '<div class="state-msg"><div class="big">⚠️</div><div class="txt">Forbindelsesfejl. Tjek internettet og prøv igen.</div></div>';
+    }
+  }
+
+  function healthPill(status) {
+    const good = ['Very good', 'Good'];
+    const mid = ['Getting better', 'Sometimes'];
+    if (good.includes(status)) return 'pill-good';
+    if (mid.includes(status)) return 'pill-mid';
+    return 'pill-low';
+  }
+
+  function renderReports() {
+    const area = document.getElementById('reportsArea');
+    document.getElementById('statTotal').textContent = allReports.length;
+
+    if (allReports.length === 0) {
+      area.innerHTML = '<div class="state-msg"><div class="big">📭</div><div class="txt">Ingen rapporter endnu. Når TZ-teamet indsender en rapport, vises den her.</div></div>';
+      return;
+    }
+
+    let html = '<div class="reports-grid">';
+    allReports.slice().reverse().forEach(function(r, idx) {
+      const realIdx = allReports.length - 1 - idx;
+      html += `
+        <div class="report-card">
+          <div class="card-top">
+            <div class="card-child-name">${esc(r.childName) || 'Ukendt barn'}</div>
+            <div class="card-meta">Rapport: ${esc(r.reportDate) || '—'} · Indsendt ${esc(r.timestamp)}</div>
+            ${r.sponsorName ? `<div style="margin-top:8px;background:rgba(201,154,62,0.18);border-radius:6px;padding:5px 10px;font-size:12px;color:#f4eee2;">👤 Sponsor: ${esc(r.sponsorName)}</div>` : '<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;">Ingen sponsor fundet i Child Mapping</div>'}
+          </div>
+          <div class="card-body">
+            <div class="info-row">
+              <div class="info-icon">❤️</div>
+              <div><span class="info-label">Helbred</span>
+                <span class="pill ${healthPill(r.healthStatus)}">${esc(r.healthStatus) || '—'}</span></div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon">📚</div>
+              <div><span class="info-label">Skole</span>
+                <span class="info-val">${esc(r.attendingSchool) || '—'}${r.grade ? ' · ' + esc(r.grade) : ''}${r.schoolRating ? ' · ' + esc(r.schoolRating) + '/5' : ''}</span></div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon">🏡</div>
+              <div><span class="info-label">Hjemme</span>
+                <span class="info-val">${esc(r.homeLife) || '—'}${r.caregiver ? ' · ' + esc(r.caregiver) : ''}</span></div>
+            </div>
+            ${r.goodThing ? `<div class="quote-block"><span class="quote-label">Noget godt</span>${esc(r.goodThing)}</div>` : ''}
+          </div>
+          <div class="card-foot">
+            <button class="compose-btn" onclick="openComposer(${realIdx})">✉ Skriv til sponsor</button>
+          </div>
+        </div>`;
+    });
+    html += '</div>';
+    area.innerHTML = html;
+  }
+
+  function esc(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/[&<>"]/g, function(c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c];
+    });
+  }
+
+  // ============================================================
+  // EMAIL COMPOSER
+  // ============================================================
+  function openComposer(idx) {
+    currentReport = allReports[idx];
+    const r = currentReport;
+
+    document.getElementById('modalTitle').textContent = 'Opdatering om ' + (r.childName || 'barn');
+    document.getElementById('recipientName').value = '';
+    document.getElementById('recipientEmail').value = '';
+    document.getElementById('emailSubject').value = 'Opdatering om dit sponsorbarn ' + (r.childName || '');
+    document.getElementById('personalMessage').value = '';
+
+    // Reference box — shows TZ data to help DK staff write
+    let ref = '';
+    if (r.healthStatus) ref += `<div class="ref-item"><strong>Helbred:</strong> ${esc(r.healthStatus)}${r.eatingWell ? ' · Spiser: ' + esc(r.eatingWell) : ''}</div>`;
+    if (r.healthNotes) ref += `<div class="ref-item"><strong>Helbredsnoter:</strong> ${esc(r.healthNotes)}</div>`;
+    if (r.attendingSchool) ref += `<div class="ref-item"><strong>Skole:</strong> ${esc(r.attendingSchool)}${r.grade ? ' · ' + esc(r.grade) : ''}${r.schoolRating ? ' · ' + esc(r.schoolRating) + '/5' : ''}</div>`;
+    if (r.favSubject) ref += `<div class="ref-item"><strong>Yndlingsfag:</strong> ${esc(r.favSubject)}</div>`;
+    if (r.schoolAchievement) ref += `<div class="ref-item"><strong>Fremgang i skolen:</strong> ${esc(r.schoolAchievement)}</div>`;
+    if (r.homeLife) ref += `<div class="ref-item"><strong>Hjemmet:</strong> ${esc(r.homeLife)}${r.caregiver ? ' · ' + esc(r.caregiver) : ''}</div>`;
+    if (r.familyChange) ref += `<div class="ref-item"><strong>Ændringer i familien:</strong> ${esc(r.familyChange)}</div>`;
+    if (r.goodThing) ref += `<div class="ref-item"><strong>Noget godt:</strong> ${esc(r.goodThing)}</div>`;
+    if (r.dream) ref += `<div class="ref-item"><strong>Barnets drøm:</strong> ${esc(r.dream)}</div>`;
+    if (r.message) ref += `<div class="ref-item"><strong>Besked til sponsor:</strong> ${esc(r.message)}</div>`;
+    document.getElementById('refContent').innerHTML = ref || '<div class="ref-item">Ingen ekstra detaljer.</div>';
+
+    document.getElementById('modalOverlay').classList.add('open');
+    refreshPreview();
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    currentReport = null;
+  }
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('langDA').classList.toggle('active', lang === 'da');
+    document.getElementById('langEN').classList.toggle('active', lang === 'en');
+    refreshPreview();
+  }
+
+  // ============================================================
+  // EMAIL TEMPLATE
+  // ============================================================
+  function buildEmailHtml() {
+    const r = currentReport || {};
+    const name = document.getElementById('recipientName').value.trim() || (currentLang === 'da' ? 'Kære sponsor' : 'Dear sponsor');
+    const message = document.getElementById('personalMessage').value.trim();
+    const childName = r.childName || '';
+
+    const t = currentLang === 'da' ? {
+      greeting: 'Kære ' + name,
+      intro: 'Vi har en opdatering til dig om dit sponsorbarn',
+      childMsgLabel: 'En hilsen fra ' + childName,
+      dreamLabel: childName + 's drøm',
+      closing: 'Tak fordi du er med til at gøre en forskel i dette barns liv. Din støtte betyder mere end ord kan beskrive.',
+      signoff: 'Med venlig hilsen',
+      team: 'Mission Tanzania · DK-teamet',
+      footTitle: 'Støt missionen',
+      footMark: 'HUSK at mærke indbetalingen MBU.TZ'
+    } : {
+      greeting: 'Dear ' + name,
+      intro: 'We have an update for you about your sponsored child',
+      childMsgLabel: 'A greeting from ' + childName,
+      dreamLabel: childName + "'s dream",
+      closing: 'Thank you for helping make a difference in this child\'s life. Your support means more than words can say.',
+      signoff: 'Warm regards',
+      team: 'Mission Tanzania · The DK Team',
+      footTitle: 'Support the mission',
+      footMark: 'Please mark your payment MBU.TZ'
+    };
+
+    return `
+<div style="margin:0;padding:0;background:#f4eee2;font-family:Georgia,serif;">
+  <div style="max-width:600px;margin:0 auto;background:#fffcf5;">
+
+    <!-- HEADER -->
+    <div style="background:#2a4f35;padding:28px 30px;text-align:center;">
+      <div style="color:#c99a3e;font-size:13px;letter-spacing:2px;text-transform:uppercase;">Mission Tanzania</div>
+      <div style="color:#ffffff;font-size:22px;margin-top:6px;font-style:italic;">Opdatering om dit sponsorbarn</div>
+      <div style="color:rgba(255,255,255,0.6);font-size:12px;margin-top:8px;">Udsendt af Betania Kirkecenters Ydremission</div>
+    </div>
+
+    <!-- COUPLE PHOTO -->
+    <div style="text-align:center;">
+      <img src="https://mission-tanzania.dk/wp-content/themes/tanzania/images/uploads/bfi_thumb/img7880a-34e134ul14lrkszln4z7d6.jpg"
+           alt="Tabitha og Torkild Jensen" style="width:100%;max-width:600px;display:block;" />
+      <div style="font-size:11px;color:#7a7060;padding:6px 0;font-style:italic;">
+        Missionærparret Tabitha og Torkild Jensen
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div style="padding:28px 32px;">
+      <p style="font-size:16px;color:#1f1a14;margin:0 0 16px;">${esc(t.greeting)},</p>
+      <p style="font-size:14px;color:#3a3326;line-height:1.7;margin:0 0 18px;">
+        ${esc(t.intro)} <strong>${esc(childName)}</strong>.
+      </p>
+
+      <!-- PERSONAL MESSAGE -->
+      <div style="font-size:14px;color:#1f1a14;line-height:1.75;white-space:pre-wrap;margin:0 0 20px;">${esc(message)}</div>
+
+      ${r.message ? `
+      <div style="background:#e9e0cd;border-left:4px solid #c99a3e;padding:14px 16px;margin:20px 0;border-radius:0 8px 8px 0;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8e3f1c;margin-bottom:5px;">${esc(t.childMsgLabel)}</div>
+        <div style="font-size:14px;color:#1f1a14;font-style:italic;line-height:1.6;">"${esc(r.message)}"</div>
+      </div>` : ''}
+
+      ${r.dream ? `
+      <div style="padding:12px 0;margin:8px 0;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#3a6b47;margin-bottom:4px;">${esc(t.dreamLabel)}</div>
+        <div style="font-size:14px;color:#3a3326;line-height:1.6;">${esc(r.dream)}</div>
+      </div>` : ''}
+
+      <p style="font-size:14px;color:#3a3326;line-height:1.7;margin:20px 0 0;">${esc(t.closing)}</p>
+
+      <p style="font-size:14px;color:#1f1a14;margin:22px 0 4px;">${esc(t.signoff)},</p>
+      <p style="font-size:14px;color:#2a4f35;font-weight:bold;margin:0;">${esc(t.team)}</p>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="background:#2a4f35;padding:24px 32px;color:#ffffff;">
+      <div style="font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#c99a3e;margin-bottom:12px;">${esc(t.footTitle)}</div>
+      <table style="width:100%;font-size:13px;color:rgba(255,255,255,0.85);line-height:1.9;">
+        <tr><td style="width:130px;">MobilePay:</td><td><strong style="color:#ffffff;">16822</strong></td></tr>
+        <tr><td>Bank:</td><td>reg. 9712 · konto 0741 793075</td></tr>
+        <tr><td>Giro:</td><td>134 4218</td></tr>
+      </table>
+      <div style="background:rgba(201,154,62,0.18);border-radius:6px;padding:8px 12px;margin-top:12px;font-size:12px;color:#f4eee2;">
+        ${esc(t.footMark)}
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:18px;padding-top:14px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.7;">
+        Mission Tanzania · Betania Kirkecenter<br>
+        Email: kontakt@mission-tanzania.dk<br>
+        Telefon: +45 22 14 87 63<br>
+        Tabitha og Torkild Jensen · P.O. Box 2398 · Arusha · Tanzania
+      </div>
+    </div>
+
+  </div>
+</div>`;
+  }
+
+  function refreshPreview() {
+    const frame = document.getElementById('previewFrame');
+    const doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open();
+    doc.write(buildEmailHtml());
+    doc.close();
+  }
+
+  // live preview as DK staff types
+  ['recipientName', 'personalMessage'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', function() {
+      clearTimeout(window._previewTimer);
+      window._previewTimer = setTimeout(refreshPreview, 400);
+    });
+  });
+
+  // ============================================================
+  // SEND EMAIL
+  // ============================================================
+  async function sendEmail() {
+    const email = document.getElementById('recipientEmail').value.trim();
+    const subject = document.getElementById('emailSubject').value.trim();
+    const message = document.getElementById('personalMessage').value.trim();
+
+    if (!email || !email.includes('@')) {
+      showToast('Indtast en gyldig email-adresse.');
+      return;
+    }
+    if (!message) {
+      showToast('Skriv en personlig besked først.');
+      return;
+    }
+
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Sender…';
+
+    const formBody =
+      'action=sendEmail' +
+      '&recipientEmail=' + encodeURIComponent(email) +
+      '&emailSubject=' + encodeURIComponent(subject) +
+      '&emailHtml=' + encodeURIComponent(buildEmailHtml());
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formBody
+      });
+      showToast('✓ Email sendt til ' + email);
+      setTimeout(closeModal, 1200);
+    } catch (err) {
+      showToast('Fejl ved afsendelse. Prøv igen.');
+    }
+
+    sendBtn.disabled = false;
+    sendBtn.textContent = '✉ Send email';
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 3500);
+  }
+</script>
+</body>
+</html>
