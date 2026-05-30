@@ -596,24 +596,31 @@
     <div class="topbar-mark">🌍</div>
     <div>
       <div class="topbar-title">Mission Tanzania</div>
-      <div class="topbar-sub">Sponsor Dashboard · Betania Kirkecenter</div>
+      <div class="topbar-sub" id="topbarSub">Sponsor Dashboard · Betania Kirkecenter</div>
     </div>
   </div>
-  <div class="topbar-stats">
-    <div class="stat">
-      <div class="stat-num" id="statTotal">0</div>
-      <div class="stat-label">Rapporter</div>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="topbar-stats">
+      <div class="stat">
+        <div class="stat-num" id="statTotal">0</div>
+        <div class="stat-label" id="statLabel">Rapporter</div>
+      </div>
     </div>
+    <div style="display:flex;gap:6px;">
+      <button id="topLangDA" onclick="setLang('da')" style="padding:6px 14px;border:1.5px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.15);border-radius:7px;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:#fff;font-weight:500;">DA</button>
+      <button id="topLangEN" onclick="setLang('en')" style="padding:6px 14px;border:1.5px solid rgba(255,255,255,0.1);background:transparent;border-radius:7px;font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;color:rgba(255,255,255,0.5);">EN</button>
+    </div>
+  </div>
   </div>
 </div>
 
 <!-- ============ MAIN ============ -->
 <div class="wrap">
   <div class="page-head">
-    <h2>Børnerapporter</h2>
-    <button class="refresh-btn" onclick="loadReports()">↻ Opdater</button>
+    <h2 id="pageTitle">Børnerapporter</h2>
+    <button class="refresh-btn" id="refreshBtn" onclick="loadReports()">↻ Opdater</button>
   </div>
-  <div class="page-sub">Rapporter indsendt af TZ-teamet. Vælg et barn for at skrive en personlig opdatering til sponsoren.</div>
+  <div class="page-sub" id="pageSub">Rapporter indsendt af TZ-teamet. Vælg et barn for at skrive en personlig opdatering til sponsoren.</div>
 
   <div id="reportsArea">
     <div class="state-msg">
@@ -634,7 +641,7 @@
 
       <!-- LEFT: info box -->
       <div class="composer-col info-side">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:8px;font-weight:500;">Oplysninger fra TZ-teamet</div>
+        <div id="lblInfoTitle" style="font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:8px;font-weight:500;">Oplysninger fra TZ-teamet</div>
         <div class="ref-box" id="refBox">
           <div id="refContent"></div>
         </div>
@@ -647,22 +654,22 @@
 
       <!-- RIGHT: composer fields + preview -->
       <div class="composer-col compose-side">
-        <label>Modtagerens navn</label>
+        <label id="lblRecipient">Modtagerens navn</label>
         <input type="text" id="recipientName" placeholder="Sponsorens navn" />
-        <div class="hint">Hvis barnet har flere sponsorer, ret blot navnet og send igen.</div>
+        <div class="hint" id="hintRecipient">Hvis barnet har flere sponsorer, ret blot navnet og send igen.</div>
 
-        <label>Emne</label>
+        <label id="lblSubject">Emne</label>
         <input type="text" id="emailSubject" />
 
-        <label>Personlig besked</label>
+        <label id="lblMessage">Personlig besked</label>
         <textarea id="personalMessage" placeholder="Skriv en personlig opdatering om barnet til sponsoren…"></textarea>
-        <div class="hint">Skriv personligt. Skabelonen tilføjer automatisk top, billeder og bundtekst.</div>
+        <div class="hint" id="hintMessage">Skriv personligt. Skabelonen tilføjer automatisk top, billeder og bundtekst.</div>
 
-        <label>Afsenders navn</label>
+        <label id="lblSender">Afsenders navn</label>
         <input type="text" id="senderName" placeholder="Dit navn" />
-        <div class="hint">Dette navn vises i signaturen på emailen.</div>
+        <div class="hint" id="hintSender">Dette navn vises i signaturen på emailen.</div>
 
-        <label style="margin-top:14px;">Forhåndsvisning af email</label>
+        <label id="lblPreview" style="margin-top:14px;">Forhåndsvisning af email</label>
         <div class="preview-frame">
           <iframe id="previewFrame" style="width:100%;height:340px;border:none;"></iframe>
         </div>
@@ -697,10 +704,177 @@
   // ============================================================
   // LOGIN
   // ============================================================
+  // ============================================================
+  // UI TRANSLATIONS
+  // ============================================================
+  const ui = {
+    da: {
+      topbarSub: 'Sponsor Dashboard · Betania Kirkecenter',
+      statLabel: 'Rapporter',
+      pageTitle: 'Børnerapporter',
+      refreshBtn: '↻ Opdater',
+      pageSub: 'Rapporter indsendt af TZ-teamet. Vælg et barn for at skrive en personlig opdatering til sponsoren.',
+      loading: 'Henter rapporter…',
+      noReports: 'Ingen rapporter endnu. Når TZ-teamet indsender en rapport, vises den her.',
+      connError: 'Forbindelsesfejl. Tjek internettet og prøv igen.',
+      fetchError: 'Kunne ikke hente data.',
+      unknownChild: 'Ukendt barn',
+      unknown: 'Ukendt',
+      report: 'Rapport',
+      submitted: 'Indsendt',
+      submittedBy: 'Indsendt af',
+      noSponsor: 'Ingen sponsor fundet i Child Mapping',
+      sponsor: 'Sponsor',
+      health: 'Helbred',
+      school: 'Skole',
+      home: 'Hjemme',
+      goodThing: 'Noget godt',
+      writeTo: '✉ Skriv til sponsor',
+      modalTitle: 'Skriv opdatering om',
+      infoTitle: 'Oplysninger fra TZ-teamet',
+      childMsgTitle: 'Barnets besked til sponsor',
+      childMsgHint: 'Brug dette som inspiration — omskriv med egne ord i den personlige besked.',
+      recipientLabel: 'Modtagerens navn',
+      recipientHint: 'Hvis barnet har flere sponsorer, ret blot navnet og send igen.',
+      subjectLabel: 'Emne',
+      messageLabel: 'Personlig besked',
+      messageHint: 'Skriv personligt. Skabelonen tilføjer automatisk top, billeder og bundtekst.',
+      senderLabel: 'Afsenders navn',
+      senderHint: 'Dette navn vises i signaturen på emailen.',
+      previewLabel: 'Forhåndsvisning af email',
+      updatePreview: '↻ Opdater visning',
+      sendBtn: '✉ Send email',
+      sending: 'Sender…',
+      noEmail: 'Ingen sponsor email fundet. Tilføj emailen i Child Mapping fanen i Google Sheet.',
+      noMessage: 'Skriv en personlig besked først.',
+      noSender: 'Skriv dit navn i afsenders navn feltet.',
+      sent: '✓ Email sendt til ',
+      sendError: 'Fejl ved afsendelse. Prøv igen.',
+      loginSub: 'Sponsor Dashboard · Kun for DK-teamet',
+      loginBtn: 'Log ind',
+      loginError: 'Forkert kode. Prøv igen.',
+      noInfo: 'Ingen ekstra detaljer.'
+    },
+    en: {
+      topbarSub: 'Sponsor Dashboard · Betania Church Centre',
+      statLabel: 'Reports',
+      pageTitle: 'Child Reports',
+      refreshBtn: '↻ Refresh',
+      pageSub: 'Reports submitted by the TZ team. Select a child to write a personal update to the sponsor.',
+      loading: 'Loading reports…',
+      noReports: 'No reports yet. When the TZ team submits a report, it will appear here.',
+      connError: 'Connection error. Check your internet and try again.',
+      fetchError: 'Could not load data.',
+      unknownChild: 'Unknown child',
+      unknown: 'Unknown',
+      report: 'Report',
+      submitted: 'Submitted',
+      submittedBy: 'Submitted by',
+      noSponsor: 'No sponsor found in Child Mapping',
+      sponsor: 'Sponsor',
+      health: 'Health',
+      school: 'School',
+      home: 'Home',
+      goodThing: 'Something good',
+      writeTo: '✉ Write to sponsor',
+      modalTitle: 'Write update about',
+      infoTitle: 'Information from TZ team',
+      childMsgTitle: "Child's message to sponsor",
+      childMsgHint: 'Use this as inspiration — rewrite in your own words in the personal message if needed.',
+      recipientLabel: 'Recipient name',
+      recipientHint: 'If the child has multiple sponsors, just change the name and send again.',
+      subjectLabel: 'Subject',
+      messageLabel: 'Personal message',
+      messageHint: 'Write personally. The template automatically adds the header, images and footer.',
+      senderLabel: 'Sender name',
+      senderHint: 'This name appears in the email signature.',
+      previewLabel: 'Email preview',
+      updatePreview: '↻ Update preview',
+      sendBtn: '✉ Send email',
+      sending: 'Sending…',
+      noEmail: 'No sponsor email found. Add the email in the Child Mapping tab in Google Sheet.',
+      noMessage: 'Please write a personal message first.',
+      noSender: 'Please enter your name in the sender name field.',
+      sent: '✓ Email sent to ',
+      sendError: 'Error sending. Please try again.',
+      loginSub: 'Sponsor Dashboard · DK Team only',
+      loginBtn: 'Log in',
+      loginError: 'Wrong code. Please try again.',
+      noInfo: 'No additional details.'
+    }
+  };
+
+  function applyUILang() {
+    const t = ui[currentLang];
+    // Topbar
+    const topbarSub = document.getElementById('topbarSub');
+    if (topbarSub) topbarSub.textContent = t.topbarSub;
+    const statLabel = document.getElementById('statLabel');
+    if (statLabel) statLabel.textContent = t.statLabel;
+    // Page
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.textContent = t.pageTitle;
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) refreshBtn.textContent = t.refreshBtn;
+    const pageSub = document.getElementById('pageSub');
+    if (pageSub) pageSub.textContent = t.pageSub;
+    // Lang toggle buttons topbar
+    const da = document.getElementById('topLangDA');
+    const en = document.getElementById('topLangEN');
+    if (da && en) {
+      if (currentLang === 'da') {
+        da.style.background = 'rgba(255,255,255,0.25)'; da.style.borderColor = 'rgba(255,255,255,0.5)'; da.style.color = '#fff';
+        en.style.background = 'transparent'; en.style.borderColor = 'rgba(255,255,255,0.1)'; en.style.color = 'rgba(255,255,255,0.5)';
+      } else {
+        en.style.background = 'rgba(255,255,255,0.25)'; en.style.borderColor = 'rgba(255,255,255,0.5)'; en.style.color = '#fff';
+        da.style.background = 'transparent'; da.style.borderColor = 'rgba(255,255,255,0.1)'; da.style.color = 'rgba(255,255,255,0.5)';
+      }
+    }
+    // Modal lang toggle buttons
+    const langDA = document.getElementById('langDA');
+    const langEN = document.getElementById('langEN');
+    if (langDA && langEN) {
+      langDA.classList.toggle('active', currentLang === 'da');
+      langEN.classList.toggle('active', currentLang === 'en');
+    }
+    // Modal labels
+    const lbls = {
+      lblRecipient: t.recipientLabel,
+      hintRecipient: t.recipientHint,
+      lblSubject: t.subjectLabel,
+      lblMessage: t.messageLabel,
+      hintMessage: t.messageHint,
+      lblSender: t.senderLabel,
+      hintSender: t.senderHint,
+      lblPreview: t.previewLabel,
+      lblInfoTitle: t.infoTitle,
+      btnUpdatePreview: t.updatePreview,
+    };
+    Object.entries(lbls).forEach(function([id, text]) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    });
+    // Send button
+    const sendBtn = document.getElementById('sendBtn');
+    if (sendBtn && !sendBtn.disabled) sendBtn.textContent = t.sendBtn;
+    // Modal title
+    if (currentReport) {
+      document.getElementById('modalTitle').textContent = t.modalTitle + ' ' + (currentReport.childName || '');
+    }
+    // Child msg box title
+    const childMsgTitle = document.querySelector('#childMsgBox div:first-child');
+    if (childMsgTitle) childMsgTitle.textContent = t.childMsgTitle;
+    const childMsgHint = document.querySelector('#childMsgBox div:last-child');
+    if (childMsgHint) childMsgHint.textContent = t.childMsgHint;
+    // Re-render cards if reports are loaded
+    if (allReports.length > 0) renderReports();
+  }
+
   function checkLogin() {
     const val = document.getElementById('pwInput').value;
     if (val === DASHBOARD_PASSWORD) {
       document.getElementById('loginGate').style.display = 'none';
+      applyUILang();
       loadReports();
     } else {
       document.getElementById('loginError').textContent = 'Forkert kode. Prøv igen.';
@@ -717,7 +891,7 @@
   // ============================================================
   async function loadReports() {
     const area = document.getElementById('reportsArea');
-    area.innerHTML = '<div class="state-msg"><div class="spinner"></div><div class="txt">Henter rapporter…</div></div>';
+    area.innerHTML = `<div class="state-msg"><div class="spinner"></div><div class="txt">${ui[currentLang].loading}</div></div>`;
 
     try {
       const res = await fetch(APPS_SCRIPT_URL);
@@ -727,10 +901,10 @@
         allReports = data.reports || [];
         renderReports();
       } else {
-        area.innerHTML = '<div class="state-msg"><div class="big">⚠️</div><div class="txt">Kunne ikke hente data.</div></div>';
+        area.innerHTML = `<div class="state-msg"><div class="big">⚠️</div><div class="txt">${ui[currentLang].fetchError}</div></div>`;
       }
     } catch (err) {
-      area.innerHTML = '<div class="state-msg"><div class="big">⚠️</div><div class="txt">Forbindelsesfejl. Tjek internettet og prøv igen.</div></div>';
+      area.innerHTML = `<div class="state-msg"><div class="big">⚠️</div><div class="txt">${ui[currentLang].connError}</div></div>`;
     }
   }
 
@@ -745,6 +919,7 @@
   function renderReports() {
     const area = document.getElementById('reportsArea');
     document.getElementById('statTotal').textContent = allReports.length;
+    applyUILang();
 
     if (allReports.length === 0) {
       area.innerHTML = '<div class="state-msg"><div class="big">📭</div><div class="txt">Ingen rapporter endnu. Når TZ-teamet indsender en rapport, vises den her.</div></div>';
@@ -757,31 +932,31 @@
       html += `
         <div class="report-card">
           <div class="card-top">
-            <div class="card-child-name">${esc(r.childName) || 'Ukendt barn'}</div>
-            <div class="card-meta">Rapport: ${esc(r.reportDate) || '—'} · Indsendt ${esc(r.timestamp)}</div>
-            <div class="card-meta" style="margin-top:3px;">Indsendt af: ${esc(r.staffName) || 'Ukendt' }</div>
-            ${r.sponsorName ? `<div style="margin-top:8px;background:rgba(201,154,62,0.18);border-radius:6px;padding:5px 10px;font-size:12px;color:#f4eee2;">👤 Sponsor: ${esc(r.sponsorName)}</div>` : '<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;">Ingen sponsor fundet i Child Mapping</div>'}
+            <div class="card-child-name">${esc(r.childName) || ui[currentLang].unknownChild}</div>
+            <div class="card-meta">${ui[currentLang].report}: ${esc(r.reportDate) || '—'} · ${ui[currentLang].submitted} ${esc(r.timestamp)}</div>
+            <div class="card-meta" style="margin-top:3px;">${ui[currentLang].submittedBy}: ${esc(r.staffName) || ui[currentLang].unknown}</div>
+            ${r.sponsorName ? `<div style="margin-top:8px;background:rgba(201,154,62,0.18);border-radius:6px;padding:5px 10px;font-size:12px;color:#f4eee2;">👤 Sponsor: ${esc(r.sponsorName)}</div>` : '<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;">${ui[currentLang].noSponsor}</div>`}
           </div>
           <div class="card-body">
             <div class="info-row">
               <div class="info-icon">❤️</div>
-              <div><span class="info-label">Helbred</span>
+              <div>${ui[currentLang].health}
                 <span class="pill ${healthPill(r.healthStatus)}">${esc(r.healthStatus) || '—'}</span></div>
             </div>
             <div class="info-row">
               <div class="info-icon">📚</div>
-              <div><span class="info-label">Skole</span>
+              <div>${ui[currentLang].school}
                 <span class="info-val">${esc(r.attendingSchool) || '—'}${r.grade ? ' · ' + esc(r.grade) : ''}${r.schoolRating ? ' · ' + esc(r.schoolRating) + '/5' : ''}</span></div>
             </div>
             <div class="info-row">
               <div class="info-icon">🏡</div>
-              <div><span class="info-label">Hjemme</span>
+              <div>${ui[currentLang].home}
                 <span class="info-val">${esc(r.homeLife) || '—'}${r.caregiver ? ' · ' + esc(r.caregiver) : ''}</span></div>
             </div>
-            ${r.goodThing ? `<div class="quote-block"><span class="quote-label">Noget godt</span>${esc(r.goodThing)}</div>` : ''}
+            ${r.goodThing ? `<div class="quote-block"><span class="quote-label">${ui[currentLang].goodThing}</span>${esc(r.goodThing)}</div>` : ''}
           </div>
           <div class="card-foot">
-            <button class="compose-btn" onclick="openComposer(${realIdx})">✉ Skriv til sponsor</button>
+            <button class="compose-btn" id="composeBtn" onclick="openComposer(${realIdx})">${ui[currentLang].writeTo}</button>
           </div>
         </div>`;
     });
@@ -847,8 +1022,7 @@
 
   function setLang(lang) {
     currentLang = lang;
-    document.getElementById('langDA').classList.toggle('active', lang === 'da');
-    document.getElementById('langEN').classList.toggle('active', lang === 'en');
+    applyUILang();
     refreshPreview();
   }
 
