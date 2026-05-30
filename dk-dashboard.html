@@ -805,7 +805,7 @@
 
     document.getElementById('modalTitle').textContent = 'Opdatering om ' + (r.childName || 'barn');
     document.getElementById('recipientName').value = '';
-    document.getElementById('recipientEmail').value = '';
+    
     document.getElementById('emailSubject').value = 'Opdatering fra dit sponsor barn';
     document.getElementById('recipientName').value = r.sponsorName || '';
     document.getElementById('senderName').value = '';
@@ -967,13 +967,13 @@
   // SEND EMAIL
   // ============================================================
   async function sendEmail() {
-    const email = document.getElementById('recipientEmail').value.trim();
+    const email = currentReport.sponsorEmail || '';
     const subject = document.getElementById('emailSubject').value.trim();
     const message = document.getElementById('personalMessage').value.trim();
     const sender = document.getElementById('senderName').value.trim();
 
     if (!email || !email.includes('@')) {
-      showToast('Indtast en gyldig email-adresse.');
+      showToast('Ingen sponsor email fundet. Tjek Child Mapping fanen i Google Sheet og tilføj emailen der.');
       return;
     }
     if (!message) {
