@@ -866,8 +866,6 @@
     if (childMsgTitle) childMsgTitle.textContent = t.childMsgTitle;
     const childMsgHint = document.querySelector('#childMsgBox div:last-child');
     if (childMsgHint) childMsgHint.textContent = t.childMsgHint;
-    // Re-render cards if reports are loaded
-    if (allReports.length > 0) renderReports();
   }
 
   function checkLogin() {
@@ -919,7 +917,6 @@
   function renderReports() {
     const area = document.getElementById('reportsArea');
     document.getElementById('statTotal').textContent = allReports.length;
-    applyUILang();
 
     if (allReports.length === 0) {
       area.innerHTML = '<div class="state-msg"><div class="big">📭</div><div class="txt">Ingen rapporter endnu. Når TZ-teamet indsender en rapport, vises den her.</div></div>';
