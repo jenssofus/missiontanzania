@@ -408,10 +408,27 @@
   .modal-close:hover { background: rgba(255,255,255,0.28); }
 
   .modal-body {
-    padding: 22px 24px;
+    padding: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 22px;
+    gap: 0;
+    height: 78vh;
+    overflow: hidden;
+  }
+
+  .info-side {
+    padding: 22px 20px;
+    overflow-y: auto;
+    background: var(--paper);
+    border-right: 1px solid var(--line);
+    height: 100%;
+  }
+
+  .compose-side {
+    padding: 22px 20px;
+    overflow-y: auto;
+    background: var(--warm-white);
+    height: 100%;
   }
 
   .composer-col label {
@@ -615,14 +632,24 @@
     </div>
     <div class="modal-body">
 
-      <!-- LEFT: composer -->
-      <div class="composer-col">
+      <!-- LEFT: info box -->
+      <div class="composer-col info-side">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:8px;font-weight:500;">Oplysninger fra TZ-teamet</div>
+        <div class="ref-box" id="refBox">
+          <div id="refContent"></div>
+        </div>
+        <div id="childMsgBox" style="display:none;margin-top:12px;background:#f4eee2;border:1.5px solid #c99a3e;border-radius:10px;padding:14px;">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:#8e3f1c;font-weight:500;margin-bottom:6px;">Barnets besked til sponsor</div>
+          <div id="childMsgContent" style="font-size:13px;color:#1f1a14;font-style:italic;line-height:1.6;"></div>
+          <div style="font-size:11px;color:#7a7060;margin-top:6px;">Brug dette som inspiration — omskriv med egne ord i den personlige besked.</div>
+        </div>
+      </div>
+
+      <!-- RIGHT: composer fields + preview -->
+      <div class="composer-col compose-side">
         <label>Modtagerens navn</label>
         <input type="text" id="recipientName" placeholder="Sponsorens navn" />
         <div class="hint">Hvis barnet har flere sponsorer, ret blot navnet og send igen.</div>
-
-        <label>Modtagerens email</label>
-        <input type="email" id="recipientEmail" placeholder="sponsor@email.dk" />
 
         <label>Emne</label>
         <input type="text" id="emailSubject" />
@@ -630,22 +657,18 @@
         <label>Personlig besked</label>
         <textarea id="personalMessage" placeholder="Skriv en personlig opdatering om barnet til sponsoren…"></textarea>
         <div class="hint">Skriv personligt. Skabelonen tilføjer automatisk top, billeder og bundtekst.</div>
-      </div>
 
-      <!-- RIGHT: reference + preview -->
-      <div class="composer-col">
-        <div class="ref-box" id="refBox">
-          <h4>Oplysninger fra TZ-teamet</h4>
-          <div id="refContent"></div>
-        </div>
-        <label>Forhåndsvisning af email</label>
+        <label>Afsenders navn</label>
+        <input type="text" id="senderName" placeholder="Dit navn" />
+        <div class="hint">Dette navn vises i signaturen på emailen.</div>
+
+        <label style="margin-top:14px;">Forhåndsvisning af email</label>
         <div class="preview-frame">
-          <iframe id="previewFrame" style="width:100%;height:300px;border:none;"></iframe>
+          <iframe id="previewFrame" style="width:100%;height:340px;border:none;"></iframe>
         </div>
       </div>
 
-    </div>
-    <div class="modal-foot">
+        <div class="modal-foot">
       <div class="lang-toggle">
         <button id="langDA" class="active" onclick="setLang('da')">Dansk</button>
         <button id="langEN" onclick="setLang('en')">English</button>
@@ -736,6 +759,7 @@
           <div class="card-top">
             <div class="card-child-name">${esc(r.childName) || 'Ukendt barn'}</div>
             <div class="card-meta">Rapport: ${esc(r.reportDate) || '—'} · Indsendt ${esc(r.timestamp)}</div>
+            <div class="card-meta" style="margin-top:3px;">Indsendt af: ${esc(r.staffName) || 'Ukendt' }</div>
             ${r.sponsorName ? `<div style="margin-top:8px;background:rgba(201,154,62,0.18);border-radius:6px;padding:5px 10px;font-size:12px;color:#f4eee2;">👤 Sponsor: ${esc(r.sponsorName)}</div>` : '<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;">Ingen sponsor fundet i Child Mapping</div>'}
           </div>
           <div class="card-body">
@@ -782,11 +806,15 @@
     document.getElementById('modalTitle').textContent = 'Opdatering om ' + (r.childName || 'barn');
     document.getElementById('recipientName').value = '';
     document.getElementById('recipientEmail').value = '';
-    document.getElementById('emailSubject').value = 'Opdatering om dit sponsorbarn ' + (r.childName || '');
+    document.getElementById('emailSubject').value = 'Opdatering fra dit sponsor barn';
+    document.getElementById('recipientName').value = r.sponsorName || '';
+    document.getElementById('senderName').value = '';
     document.getElementById('personalMessage').value = '';
 
     // Reference box — shows TZ data to help DK staff write
     let ref = '';
+    if (r.staffName) ref += `<div class="ref-item"><strong>Indsendt af:</strong> ${esc(r.staffName)}</div>`;
+    if (r.reportDate) ref += `<div class="ref-item"><strong>Rapportdato:</strong> ${esc(r.reportDate)}</div>`;
     if (r.healthStatus) ref += `<div class="ref-item"><strong>Helbred:</strong> ${esc(r.healthStatus)}${r.eatingWell ? ' · Spiser: ' + esc(r.eatingWell) : ''}</div>`;
     if (r.healthNotes) ref += `<div class="ref-item"><strong>Helbredsnoter:</strong> ${esc(r.healthNotes)}</div>`;
     if (r.attendingSchool) ref += `<div class="ref-item"><strong>Skole:</strong> ${esc(r.attendingSchool)}${r.grade ? ' · ' + esc(r.grade) : ''}${r.schoolRating ? ' · ' + esc(r.schoolRating) + '/5' : ''}</div>`;
@@ -796,8 +824,17 @@
     if (r.familyChange) ref += `<div class="ref-item"><strong>Ændringer i familien:</strong> ${esc(r.familyChange)}</div>`;
     if (r.goodThing) ref += `<div class="ref-item"><strong>Noget godt:</strong> ${esc(r.goodThing)}</div>`;
     if (r.dream) ref += `<div class="ref-item"><strong>Barnets drøm:</strong> ${esc(r.dream)}</div>`;
-    if (r.message) ref += `<div class="ref-item"><strong>Besked til sponsor:</strong> ${esc(r.message)}</div>`;
+    // Child message gets its own box — set separately
+    const childMsg = r.message || '';
     document.getElementById('refContent').innerHTML = ref || '<div class="ref-item">Ingen ekstra detaljer.</div>';
+    const msgBox = document.getElementById('childMsgBox');
+    const msgContent = document.getElementById('childMsgContent');
+    if (childMsg) {
+      msgBox.style.display = 'block';
+      msgContent.textContent = childMsg;
+    } else {
+      msgBox.style.display = 'none';
+    }
 
     document.getElementById('modalOverlay').classList.add('open');
     refreshPreview();
@@ -822,28 +859,30 @@
     const r = currentReport || {};
     const name = document.getElementById('recipientName').value.trim() || (currentLang === 'da' ? 'Kære sponsor' : 'Dear sponsor');
     const message = document.getElementById('personalMessage').value.trim();
+    const senderName = document.getElementById('senderName').value.trim() || 'MBU-teamet';
     const childName = r.childName || '';
+    const childMsg = r.message || '';
 
     const t = currentLang === 'da' ? {
       greeting: 'Kære ' + name,
-      intro: 'Vi har en opdatering til dig om dit sponsorbarn',
-      childMsgLabel: 'En hilsen fra ' + childName,
-      dreamLabel: childName + 's drøm',
-      closing: 'Tak fordi du er med til at gøre en forskel i dette barns liv. Din støtte betyder mere end ord kan beskrive.',
-      signoff: 'Med venlig hilsen',
-      team: 'Mission Tanzania · DK-teamet',
+      closing: 'Som altid, tusind tak for din personlige støtte til ' + childName + 's liv!',
+      signoff: 'Med kærlig hilsen',
+      headerTitle: 'Opdatering om dit sponsorbarn',
+      headerSub: 'Udsendt af Betania Kirkecenters Ydremission',
+      coupleCaption: 'Missionærparret Tabitha og Torkild Jensen',
       footTitle: 'Støt missionen',
-      footMark: 'HUSK at mærke indbetalingen MBU.TZ'
+      footMark: 'HUSK at mærke indbetalingen MBU.TZ for generel støtte. Kontakt os for personlig støtte til et sponsor barn',
+      footContact: 'Mission Tanzania · Betania Kirkecenter<br>Email: kontakt@mission-tanzania.dk<br>Telefon: +45 22 14 87 63<br>Tabitha og Torkild Jensen · P.O. Box 2398 · Arusha · Tanzania'
     } : {
       greeting: 'Dear ' + name,
-      intro: 'We have an update for you about your sponsored child',
-      childMsgLabel: 'A greeting from ' + childName,
-      dreamLabel: childName + "'s dream",
-      closing: 'Thank you for helping make a difference in this child\'s life. Your support means more than words can say.',
+      closing: 'As always, thank you so much for your personal support in ' + childName + "'s life!",
       signoff: 'Warm regards',
-      team: 'Mission Tanzania · The DK Team',
+      headerTitle: 'Update about your sponsored child',
+      headerSub: 'Sent by Betania Church Centre Mission',
+      coupleCaption: 'Missionaries Tabitha and Torkild Jensen',
       footTitle: 'Support the mission',
-      footMark: 'Please mark your payment MBU.TZ'
+      footMark: 'Please mark your payment MBU.TZ for general support. Contact us for personal support of a sponsored child',
+      footContact: 'Mission Tanzania · Betania Church Centre<br>Email: kontakt@mission-tanzania.dk<br>Phone: +45 22 14 87 63<br>Tabitha and Torkild Jensen · P.O. Box 2398 · Arusha · Tanzania'
     };
 
     return `
@@ -853,8 +892,8 @@
     <!-- HEADER -->
     <div style="background:#2a4f35;padding:28px 30px;text-align:center;">
       <div style="color:#c99a3e;font-size:13px;letter-spacing:2px;text-transform:uppercase;">Mission Tanzania</div>
-      <div style="color:#ffffff;font-size:22px;margin-top:6px;font-style:italic;">Opdatering om dit sponsorbarn</div>
-      <div style="color:rgba(255,255,255,0.6);font-size:12px;margin-top:8px;">Udsendt af Betania Kirkecenters Ydremission</div>
+      <div style="color:#ffffff;font-size:22px;margin-top:6px;font-style:italic;">${esc(t.headerTitle)}</div>
+      <div style="color:rgba(255,255,255,0.6);font-size:12px;margin-top:8px;">${esc(t.headerSub)}</div>
     </div>
 
     <!-- COUPLE PHOTO -->
@@ -862,36 +901,30 @@
       <img src="https://mission-tanzania.dk/wp-content/themes/tanzania/images/uploads/bfi_thumb/img7880a-34e134ul14lrkszln4z7d6.jpg"
            alt="Tabitha og Torkild Jensen" style="width:100%;max-width:600px;display:block;" />
       <div style="font-size:11px;color:#7a7060;padding:6px 0;font-style:italic;">
-        Missionærparret Tabitha og Torkild Jensen
+        ${esc(t.coupleCaption)}
       </div>
     </div>
 
     <!-- BODY -->
     <div style="padding:28px 32px;">
-      <p style="font-size:16px;color:#1f1a14;margin:0 0 16px;">${esc(t.greeting)},</p>
-      <p style="font-size:14px;color:#3a3326;line-height:1.7;margin:0 0 18px;">
-        ${esc(t.intro)} <strong>${esc(childName)}</strong>.
-      </p>
+      <p style="font-size:16px;color:#1f1a14;margin:0 0 20px;">${esc(t.greeting)},</p>
 
-      <!-- PERSONAL MESSAGE -->
-      <div style="font-size:14px;color:#1f1a14;line-height:1.75;white-space:pre-wrap;margin:0 0 20px;">${esc(message)}</div>
+      <!-- PERSONAL MESSAGE FIRST -->
+      <div style="font-size:14px;color:#1f1a14;line-height:1.75;white-space:pre-wrap;margin:0 0 24px;">${esc(message)}</div>
 
-      ${r.message ? `
-      <div style="background:#e9e0cd;border-left:4px solid #c99a3e;padding:14px 16px;margin:20px 0;border-radius:0 8px 8px 0;">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#8e3f1c;margin-bottom:5px;">${esc(t.childMsgLabel)}</div>
-        <div style="font-size:14px;color:#1f1a14;font-style:italic;line-height:1.6;">"${esc(r.message)}"</div>
-      </div>` : ''}
+      
 
-      ${r.dream ? `
-      <div style="padding:12px 0;margin:8px 0;">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#3a6b47;margin-bottom:4px;">${esc(t.dreamLabel)}</div>
-        <div style="font-size:14px;color:#3a3326;line-height:1.6;">${esc(r.dream)}</div>
-      </div>` : ''}
+      <!-- PHOTO PLACEHOLDER -->
+      <div style="background:#f4eee2;border-radius:8px;padding:16px;margin:0 0 24px;text-align:center;color:#7a7060;font-size:13px;font-style:italic;">
+        📷 Billeder af barnet tilføjes her, når foto-upload er sat op.
+      </div>
 
-      <p style="font-size:14px;color:#3a3326;line-height:1.7;margin:20px 0 0;">${esc(t.closing)}</p>
 
-      <p style="font-size:14px;color:#1f1a14;margin:22px 0 4px;">${esc(t.signoff)},</p>
-      <p style="font-size:14px;color:#2a4f35;font-weight:bold;margin:0;">${esc(t.team)}</p>
+
+      <p style="font-size:14px;color:#3a3326;line-height:1.7;margin:0 0 20px;">${esc(t.closing)}</p>
+
+      <p style="font-size:14px;color:#1f1a14;margin:28px 0 4px;">${esc(t.signoff)},</p>
+      <p style="font-size:14px;color:#2a4f35;font-weight:bold;margin:0;">${esc(senderName)}, MBU</p>
     </div>
 
     <!-- FOOTER -->
@@ -906,10 +939,7 @@
         ${esc(t.footMark)}
       </div>
       <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:18px;padding-top:14px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.7;">
-        Mission Tanzania · Betania Kirkecenter<br>
-        Email: kontakt@mission-tanzania.dk<br>
-        Telefon: +45 22 14 87 63<br>
-        Tabitha og Torkild Jensen · P.O. Box 2398 · Arusha · Tanzania
+        ${t.footContact}
       </div>
     </div>
 
@@ -926,7 +956,7 @@
   }
 
   // live preview as DK staff types
-  ['recipientName', 'personalMessage'].forEach(function(id) {
+  ['recipientName', 'personalMessage', 'senderName'].forEach(function(id) {
     document.getElementById(id).addEventListener('input', function() {
       clearTimeout(window._previewTimer);
       window._previewTimer = setTimeout(refreshPreview, 400);
@@ -940,6 +970,7 @@
     const email = document.getElementById('recipientEmail').value.trim();
     const subject = document.getElementById('emailSubject').value.trim();
     const message = document.getElementById('personalMessage').value.trim();
+    const sender = document.getElementById('senderName').value.trim();
 
     if (!email || !email.includes('@')) {
       showToast('Indtast en gyldig email-adresse.');
@@ -947,6 +978,10 @@
     }
     if (!message) {
       showToast('Skriv en personlig besked først.');
+      return;
+    }
+    if (!sender) {
+      showToast('Skriv dit navn i afsenders navn feltet.');
       return;
     }
 
