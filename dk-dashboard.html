@@ -1082,7 +1082,6 @@
 
     const t = currentLang === 'da' ? {
       greeting: 'Kære ' + name,
-      closing: 'Som altid, tusind tak for din personlige støtte til ' + childName + 's liv!',
       signoff: 'Med kærlig hilsen',
       headerTitle: 'Opdatering om dit sponsorbarn',
       headerSub: 'Udsendt af Betania Kirkecenters Ydremission',
@@ -1092,7 +1091,6 @@
       footContact: 'Mission Tanzania · Betania Kirkecenter<br>Email: kontakt@mission-tanzania.dk<br>Telefon: +45 22 14 87 63<br>Tabitha og Torkild Jensen · P.O. Box 2398 · Arusha · Tanzania'
     } : {
       greeting: 'Dear ' + name,
-      closing: 'As always, thank you so much for your personal support in ' + childName + "'s life!",
       signoff: 'Warm regards',
       headerTitle: 'Update about your sponsored child',
       headerSub: 'Sent by Betania Church Centre Mission',
@@ -1137,8 +1135,6 @@
       </div>
 
 
-
-      <p style="font-size:14px;color:#3a3326;line-height:1.7;margin:0 0 20px;">${esc(t.closing)}</p>
 
       <p style="font-size:14px;color:#1f1a14;margin:28px 0 4px;">${esc(t.signoff)},</p>
       <p style="font-size:14px;color:#2a4f35;font-weight:bold;margin:0;">${esc(senderName)}, MBU</p>
