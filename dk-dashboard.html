@@ -583,9 +583,9 @@
   <div class="login-card">
     <div class="login-mark">🌍</div>
     <h1>Mission Tanzania</h1>
-    <p>Sponsor Dashboard · Kun for DK-teamet</p>
+    <p id="loginSubText">Sponsor Dashboard · Kun for DK-teamet</p>
     <input type="password" id="pwInput" maxlength="8" placeholder="••••" inputmode="numeric" />
-    <button onclick="checkLogin()">Log ind</button>
+    <button id="loginBtn" onclick="checkLogin()">Log ind</button>
     <div class="login-error" id="loginError"></div>
   </div>
 </div>
@@ -646,27 +646,27 @@
           <div id="refContent"></div>
         </div>
         <div id="childMsgBox" style="display:none;margin-top:12px;background:#f4eee2;border:1.5px solid #c99a3e;border-radius:10px;padding:14px;">
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:#8e3f1c;font-weight:500;margin-bottom:6px;">Barnets besked til sponsor</div>
+          <div id="childMsgTitleEl" style="font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:#8e3f1c;font-weight:500;margin-bottom:6px;">Barnets besked til sponsor</div>
           <div id="childMsgContent" style="font-size:13px;color:#1f1a14;font-style:italic;line-height:1.6;"></div>
-          <div style="font-size:11px;color:#7a7060;margin-top:6px;">Brug dette som inspiration — omskriv med egne ord i den personlige besked.</div>
+          <div id="childMsgHintEl" style="font-size:11px;color:#7a7060;margin-top:6px;">Brug dette som inspiration — omskriv med egne ord i den personlige besked.</div>
         </div>
       </div>
 
       <!-- RIGHT: composer fields + preview -->
       <div class="composer-col compose-side">
         <label id="lblRecipient">Modtagerens navn</label>
-        <input type="text" id="recipientName" placeholder="Sponsorens navn" />
+        <input type="text" id="recipientName" id="phRecipient" placeholder="Sponsorens navn" />
         <div class="hint" id="hintRecipient">Hvis barnet har flere sponsorer, ret blot navnet og send igen.</div>
 
         <label id="lblSubject">Emne</label>
         <input type="text" id="emailSubject" />
 
         <label id="lblMessage">Personlig besked</label>
-        <textarea id="personalMessage" placeholder="Skriv en personlig opdatering om barnet til sponsoren…"></textarea>
+        <textarea id="personalMessage" id="phMessage" placeholder="Skriv en personlig opdatering om barnet til sponsoren…"></textarea>
         <div class="hint" id="hintMessage">Skriv personligt. Skabelonen tilføjer automatisk top, billeder og bundtekst.</div>
 
         <label id="lblSender">Afsenders navn</label>
-        <input type="text" id="senderName" placeholder="Dit navn" />
+        <input type="text" id="senderName" id="phSender" placeholder="Dit navn" />
         <div class="hint" id="hintSender">Dette navn vises i signaturen på emailen.</div>
 
         <label id="lblPreview" style="margin-top:14px;">Forhåndsvisning af email</label>
@@ -751,9 +751,26 @@
       sent: '✓ Email sendt til ',
       sendError: 'Fejl ved afsendelse. Prøv igen.',
       loginSub: 'Sponsor Dashboard · Kun for DK-teamet',
+      loginBtnText: 'Log ind',
+      phRecipient: 'Sponsorens navn',
+      phMessage: 'Skriv en personlig opdatering om barnet til sponsoren…',
+      phSender: 'Dit navn',
       loginBtn: 'Log ind',
       loginError: 'Forkert kode. Prøv igen.',
-      noInfo: 'Ingen ekstra detaljer.'
+      noInfo: 'Ingen ekstra detaljer.',
+      refSubmittedBy: 'Indsendt af',
+      refReportDate: 'Rapportdato',
+      refHealth: 'Helbred',
+      refEating: 'Spiser',
+      refHealthNotes: 'Helbredsnoter',
+      refSchool: 'Skole',
+      refFavSubject: 'Yndlingsfag',
+      refSchoolProgress: 'Fremgang i skolen',
+      refHome: 'Hjemmet',
+      refFamilyChange: 'Ændringer i familien',
+      refGoodThing: 'Noget godt',
+      refDream: 'Barnets drøm',
+      refSponsor: 'Sponsor'
     },
     en: {
       topbarSub: 'Sponsor Dashboard · Betania Church Centre',
@@ -798,9 +815,26 @@
       sent: '✓ Email sent to ',
       sendError: 'Error sending. Please try again.',
       loginSub: 'Sponsor Dashboard · DK Team only',
+      loginBtnText: 'Log in',
+      phRecipient: 'Sponsor name',
+      phMessage: 'Write a personal update about the child for the sponsor…',
+      phSender: 'Your name',
       loginBtn: 'Log in',
       loginError: 'Wrong code. Please try again.',
-      noInfo: 'No additional details.'
+      noInfo: 'No additional details.',
+      refSubmittedBy: 'Submitted by',
+      refReportDate: 'Report date',
+      refHealth: 'Health',
+      refEating: 'Eating',
+      refHealthNotes: 'Health notes',
+      refSchool: 'School',
+      refFavSubject: 'Favourite subject',
+      refSchoolProgress: 'School progress',
+      refHome: 'Home',
+      refFamilyChange: 'Family changes',
+      refGoodThing: 'Something good',
+      refDream: "Child's dream",
+      refSponsor: 'Sponsor'
     }
   };
 
@@ -861,11 +895,23 @@
     if (currentReport) {
       document.getElementById('modalTitle').textContent = t.modalTitle + ' ' + (currentReport.childName || '');
     }
-    // Child msg box title
-    const childMsgTitle = document.querySelector('#childMsgBox div:first-child');
-    if (childMsgTitle) childMsgTitle.textContent = t.childMsgTitle;
-    const childMsgHint = document.querySelector('#childMsgBox div:last-child');
-    if (childMsgHint) childMsgHint.textContent = t.childMsgHint;
+    // Child msg box title and hint (using IDs)
+    const childMsgTitleEl = document.getElementById('childMsgTitleEl');
+    if (childMsgTitleEl) childMsgTitleEl.textContent = t.childMsgTitle;
+    const childMsgHintEl = document.getElementById('childMsgHintEl');
+    if (childMsgHintEl) childMsgHintEl.textContent = t.childMsgHint;
+    // Login page
+    const loginSubEl = document.getElementById('loginSubText');
+    if (loginSubEl) loginSubEl.textContent = t.loginSub;
+    const loginBtnEl = document.getElementById('loginBtn');
+    if (loginBtnEl) loginBtnEl.textContent = t.loginBtnText;
+    // Placeholders
+    const phRecipient = document.getElementById('phRecipient');
+    if (phRecipient) phRecipient.placeholder = t.phRecipient;
+    const phMessage = document.getElementById('phMessage');
+    if (phMessage) phMessage.placeholder = t.phMessage;
+    const phSender = document.getElementById('phSender');
+    if (phSender) phSender.placeholder = t.phSender;
   }
 
   function checkLogin() {
@@ -985,20 +1031,20 @@
 
     // Reference box — shows TZ data to help DK staff write
     let ref = '';
-    if (r.staffName) ref += `<div class="ref-item"><strong>Indsendt af:</strong> ${esc(r.staffName)}</div>`;
-    if (r.reportDate) ref += `<div class="ref-item"><strong>Rapportdato:</strong> ${esc(r.reportDate)}</div>`;
-    if (r.healthStatus) ref += `<div class="ref-item"><strong>Helbred:</strong> ${esc(r.healthStatus)}${r.eatingWell ? ' · Spiser: ' + esc(r.eatingWell) : ''}</div>`;
-    if (r.healthNotes) ref += `<div class="ref-item"><strong>Helbredsnoter:</strong> ${esc(r.healthNotes)}</div>`;
-    if (r.attendingSchool) ref += `<div class="ref-item"><strong>Skole:</strong> ${esc(r.attendingSchool)}${r.grade ? ' · ' + esc(r.grade) : ''}${r.schoolRating ? ' · ' + esc(r.schoolRating) + '/5' : ''}</div>`;
-    if (r.favSubject) ref += `<div class="ref-item"><strong>Yndlingsfag:</strong> ${esc(r.favSubject)}</div>`;
-    if (r.schoolAchievement) ref += `<div class="ref-item"><strong>Fremgang i skolen:</strong> ${esc(r.schoolAchievement)}</div>`;
-    if (r.homeLife) ref += `<div class="ref-item"><strong>Hjemmet:</strong> ${esc(r.homeLife)}${r.caregiver ? ' · ' + esc(r.caregiver) : ''}</div>`;
-    if (r.familyChange) ref += `<div class="ref-item"><strong>Ændringer i familien:</strong> ${esc(r.familyChange)}</div>`;
-    if (r.goodThing) ref += `<div class="ref-item"><strong>Noget godt:</strong> ${esc(r.goodThing)}</div>`;
-    if (r.dream) ref += `<div class="ref-item"><strong>Barnets drøm:</strong> ${esc(r.dream)}</div>`;
+    if (r.staffName) ref += `<div class="ref-item"><strong>${ui[currentLang].refSubmittedBy}:</strong> ${esc(r.staffName)}</div>`;
+    if (r.reportDate) ref += `<div class="ref-item"><strong>${ui[currentLang].refReportDate}:</strong> ${esc(r.reportDate)}</div>`;
+    if (r.healthStatus) ref += `<div class="ref-item"><strong>${ui[currentLang].refHealth}:</strong> ${esc(r.healthStatus)}${r.eatingWell ? ' · ' + ui[currentLang].refEating + ': ' + esc(r.eatingWell) : ''}</div>`;
+    if (r.healthNotes) ref += `<div class="ref-item"><strong>${ui[currentLang].refHealthNotes}:</strong> ${esc(r.healthNotes)}</div>`;
+    if (r.attendingSchool) ref += `<div class="ref-item"><strong>${ui[currentLang].refSchool}:</strong> ${esc(r.attendingSchool)}${r.grade ? ' · ' + esc(r.grade) : ''}${r.schoolRating ? ' · ' + esc(r.schoolRating) + '/5' : ''}</div>`;
+    if (r.favSubject) ref += `<div class="ref-item"><strong>${ui[currentLang].refFavSubject}:</strong> ${esc(r.favSubject)}</div>`;
+    if (r.schoolAchievement) ref += `<div class="ref-item"><strong>${ui[currentLang].refSchoolProgress}:</strong> ${esc(r.schoolAchievement)}</div>`;
+    if (r.homeLife) ref += `<div class="ref-item"><strong>${ui[currentLang].refHome}:</strong> ${esc(r.homeLife)}${r.caregiver ? ' · ' + esc(r.caregiver) : ''}</div>`;
+    if (r.familyChange) ref += `<div class="ref-item"><strong>${ui[currentLang].refFamilyChange}:</strong> ${esc(r.familyChange)}</div>`;
+    if (r.goodThing) ref += `<div class="ref-item"><strong>${ui[currentLang].refGoodThing}:</strong> ${esc(r.goodThing)}</div>`;
+    if (r.dream) ref += `<div class="ref-item"><strong>${ui[currentLang].refDream}:</strong> ${esc(r.dream)}</div>`;
     // Child message gets its own box — set separately
     const childMsg = r.message || '';
-    document.getElementById('refContent').innerHTML = ref || '<div class="ref-item">Ingen ekstra detaljer.</div>';
+    document.getElementById('refContent').innerHTML = ref || `<div class="ref-item">${ui[currentLang].noInfo}</div>`;
     const msgBox = document.getElementById('childMsgBox');
     const msgContent = document.getElementById('childMsgContent');
     if (childMsg) {
