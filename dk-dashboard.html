@@ -695,7 +695,8 @@
   // CONFIG
   // ============================================================
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxj-nQP1vdBAdDdrUtMRYJDZjYocDVNGHNpy73LKl785DCSNkENhvjJDIc65ZWIrS-L/exec";
-  const DASHBOARD_PASSWORD = "1235";
+  // Password is no longer stored here — validated server-side only
+  let sessionToken = null;
 
   let allReports = [];
   let currentReport = null;
@@ -891,6 +892,8 @@
     // Send button
     const sendBtn = document.getElementById('sendBtn');
     if (sendBtn && !sendBtn.disabled) sendBtn.textContent = t.sendBtn;
+    // Rebuild ref box on language switch if modal is open
+    if (currentReport) buildRefBox();
     // Modal title
     if (currentReport) {
       document.getElementById('modalTitle').textContent = t.modalTitle + ' ' + (currentReport.childName || '');
@@ -914,16 +917,33 @@
     if (phSender) phSender.placeholder = t.phSender;
   }
 
-  function checkLogin() {
-    const val = document.getElementById('pwInput').value;
-    if (val === DASHBOARD_PASSWORD) {
-      document.getElementById('loginGate').style.display = 'none';
-      applyUILang();
-      loadReports();
-    } else {
-      document.getElementById('loginError').textContent = 'Forkert kode. Prøv igen.';
-      document.getElementById('pwInput').value = '';
+  async function checkLogin() {
+    const val = document.getElementById('pwInput').value.trim();
+    if (!val) return;
+
+    const loginBtn = document.getElementById('loginBtn');
+    loginBtn.disabled = true;
+    loginBtn.textContent = '...';
+
+    try {
+      const res = await fetch(APPS_SCRIPT_URL + '?action=auth&pw=' + encodeURIComponent(val));
+      const data = await res.json();
+
+      if (data.status === 'success' && data.token) {
+        sessionToken = data.token;
+        document.getElementById('loginGate').style.display = 'none';
+        applyUILang();
+        loadReports();
+      } else {
+        document.getElementById('loginError').textContent = ui[currentLang].loginError;
+        document.getElementById('pwInput').value = '';
+      }
+    } catch (err) {
+      document.getElementById('loginError').textContent = 'Forbindelsesfejl. Prøv igen.';
     }
+
+    loginBtn.disabled = false;
+    loginBtn.textContent = ui[currentLang].loginBtnText;
   }
 
   document.getElementById('pwInput').addEventListener('keydown', function(e) {
@@ -938,9 +958,16 @@
     area.innerHTML = `<div class="state-msg"><div class="spinner"></div><div class="txt">${ui[currentLang].loading}</div></div>`;
 
     try {
-      const res = await fetch(APPS_SCRIPT_URL);
+      const res = await fetch(APPS_SCRIPT_URL + '?action=data&token=' + encodeURIComponent(sessionToken || ''));
       const data = await res.json();
 
+      if (data.status === 'error' && data.message && data.message.includes('session')) {
+        // Token expired — show login again
+        sessionToken = null;
+        document.getElementById('loginGate').style.display = 'flex';
+        area.innerHTML = '';
+        return;
+      }
       if (data.status === 'success') {
         allReports = data.reports || [];
         renderReports();
@@ -1017,19 +1044,12 @@
   // ============================================================
   // EMAIL COMPOSER
   // ============================================================
-  function openComposer(idx) {
-    currentReport = allReports[idx];
+  // ------------------------------------------------------------
+  // Builds the reference info box — called on open AND on lang switch
+  // ------------------------------------------------------------
+  function buildRefBox() {
+    if (!currentReport) return;
     const r = currentReport;
-
-    document.getElementById('modalTitle').textContent = 'Opdatering om ' + (r.childName || 'barn');
-    document.getElementById('recipientName').value = '';
-    
-    document.getElementById('emailSubject').value = 'Opdatering fra dit sponsor barn';
-    document.getElementById('recipientName').value = r.sponsorName || '';
-    document.getElementById('senderName').value = '';
-    document.getElementById('personalMessage').value = '';
-
-    // Reference box — shows TZ data to help DK staff write
     let ref = '';
     if (r.staffName) ref += `<div class="ref-item"><strong>${ui[currentLang].refSubmittedBy}:</strong> ${esc(r.staffName)}</div>`;
     if (r.reportDate) ref += `<div class="ref-item"><strong>${ui[currentLang].refReportDate}:</strong> ${esc(r.reportDate)}</div>`;
@@ -1042,17 +1062,32 @@
     if (r.familyChange) ref += `<div class="ref-item"><strong>${ui[currentLang].refFamilyChange}:</strong> ${esc(r.familyChange)}</div>`;
     if (r.goodThing) ref += `<div class="ref-item"><strong>${ui[currentLang].refGoodThing}:</strong> ${esc(r.goodThing)}</div>`;
     if (r.dream) ref += `<div class="ref-item"><strong>${ui[currentLang].refDream}:</strong> ${esc(r.dream)}</div>`;
-    // Child message gets its own box — set separately
-    const childMsg = r.message || '';
     document.getElementById('refContent').innerHTML = ref || `<div class="ref-item">${ui[currentLang].noInfo}</div>`;
+    // Child message box
     const msgBox = document.getElementById('childMsgBox');
     const msgContent = document.getElementById('childMsgContent');
-    if (childMsg) {
+    if (currentReport.message) {
       msgBox.style.display = 'block';
-      msgContent.textContent = childMsg;
+      msgContent.textContent = currentReport.message;
     } else {
       msgBox.style.display = 'none';
     }
+  }
+
+    function openComposer(idx) {
+    currentReport = allReports[idx];
+    const r = currentReport;
+
+    document.getElementById('modalTitle').textContent = ui[currentLang].modalTitle + ' ' + (r.childName || '');
+    document.getElementById('recipientName').value = '';
+    
+    document.getElementById('emailSubject').value = 'Opdatering fra dit sponsor barn';
+    document.getElementById('recipientName').value = r.sponsorName || '';
+    document.getElementById('senderName').value = '';
+    document.getElementById('personalMessage').value = '';
+
+    // Build ref box using shared function so it rebuilds on language switch
+    buildRefBox();
 
     document.getElementById('modalOverlay').classList.add('open');
     refreshPreview();
@@ -1087,7 +1122,7 @@
       headerSub: 'Udsendt af Betania Kirkecenters Ydremission',
       coupleCaption: 'Missionærparret Tabitha og Torkild Jensen',
       footTitle: 'Støt missionen',
-      footMark: 'HUSK at mærke indbetalingen MBU.TZ for generel støtte. Kontakt os for personlig støtte til et sponsor barn',
+      footMark: 'HUSK at mærke indbetalingen <strong style="color:#c99a3e;">MBU.TZ</strong> for generel støtte.',
       footContact: 'Mission Tanzania · Betania Kirkecenter<br>Email: kontakt@mission-tanzania.dk<br>Telefon: +45 22 14 87 63<br>Tabitha og Torkild Jensen · P.O. Box 2398 · Arusha · Tanzania'
     } : {
       greeting: 'Dear ' + name,
@@ -1096,7 +1131,7 @@
       headerSub: 'Sent by Betania Church Centre Mission',
       coupleCaption: 'Missionaries Tabitha and Torkild Jensen',
       footTitle: 'Support the mission',
-      footMark: 'Please mark your payment MBU.TZ for general support. Contact us for personal support of a sponsored child',
+      footMark: 'Please mark your payment <strong style="color:#c99a3e;">MBU.TZ</strong> for general support.',
       footContact: 'Mission Tanzania · Betania Church Centre<br>Email: kontakt@mission-tanzania.dk<br>Phone: +45 22 14 87 63<br>Tabitha and Torkild Jensen · P.O. Box 2398 · Arusha · Tanzania'
     };
 
@@ -1148,10 +1183,10 @@
         <tr><td>Bank:</td><td>reg. 9712 · konto 0741 793075</td></tr>
         <tr><td>Giro:</td><td>134 4218</td></tr>
       </table>
-      <div style="background:rgba(201,154,62,0.18);border-radius:6px;padding:8px 12px;margin-top:12px;font-size:12px;color:#f4eee2;">
-        ${esc(t.footMark)}
+      <div style="background:rgba(255,255,255,0.18);border-radius:6px;padding:10px 14px;margin-top:12px;font-size:12px;color:#ffffff;border:1px solid rgba(255,255,255,0.3);font-weight:500;">
+        ${t.footMark}
       </div>
-      <div style="border-top:1px solid rgba(255,255,255,0.15);margin-top:18px;padding-top:14px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.7;">
+      <div style="border-top:1px solid rgba(255,255,255,0.2);margin-top:18px;padding-top:14px;font-size:12px;color:rgba(255,255,255,0.85);line-height:1.7;">
         ${t.footContact}
       </div>
     </div>
