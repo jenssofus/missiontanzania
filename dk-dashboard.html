@@ -570,6 +570,50 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
+  /* Sponsor tabs */
+  .sponsor-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 18px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .sponsor-tab-btn:hover { color: var(--ink); background: rgba(255,255,255,0.4); }
+  .sponsor-tab-btn.active { color: var(--acacia-deep); border-bottom-color: var(--acacia); background: var(--card); }
+  .tab-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--acacia);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .sponsor-tab-btn.active .tab-avatar { background: var(--acacia-deep); }
+  .tab-sent-tick {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #4A7C59;
+    color: #fff;
+    font-size: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   @media (max-width: 720px) {
     .modal-body { grid-template-columns: 1fr; }
     .topbar-stats { display: none; }
@@ -637,9 +681,19 @@
       <h3 id="modalTitle">Skriv opdatering</h3>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
+
+    <!-- Sponsor badge (shown when multiple sponsors) -->
+    <div id="sponsorBadgeArea" style="display:none;align-items:center;gap:10px;padding:10px 24px;background:rgba(201,154,62,0.12);border-bottom:1px solid rgba(201,154,62,0.25);">
+      <span style="font-size:15px;">👥</span>
+      <span id="sponsorBadgeText" style="font-size:13px;color:var(--ink);font-weight:500;"></span>
+    </div>
+
+    <!-- Sponsor tabs (shown when multiple sponsors) -->
+    <div id="sponsorTabsArea" style="display:none;border-bottom:2px solid var(--line);background:var(--paper-deep);padding:0 24px;overflow-x:auto;"></div>
+
     <div class="modal-body">
 
-      <!-- LEFT: info box -->
+      <!-- LEFT: info box (always visible) -->
       <div class="composer-col info-side">
         <div id="lblInfoTitle" style="font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:8px;font-weight:500;">Oplysninger fra TZ-teamet</div>
         <div class="ref-box" id="refBox">
@@ -652,11 +706,11 @@
         </div>
       </div>
 
-      <!-- RIGHT: composer fields + preview -->
+      <!-- RIGHT: compose per sponsor -->
       <div class="composer-col compose-side">
         <label id="lblRecipient">Modtagerens navn</label>
         <input type="text" id="recipientName" id="phRecipient" placeholder="Sponsorens navn" />
-        <div class="hint" id="hintRecipient">Hvis barnet har flere sponsorer, ret blot navnet og send igen.</div>
+        <div class="hint" id="hintRecipient">Hvis barnet har flere sponsorer, skift fane for hver sponsor.</div>
 
         <label id="lblSubject">Emne</label>
         <input type="text" id="emailSubject" />
@@ -675,13 +729,18 @@
         </div>
       </div>
 
-        <div class="modal-foot">
-      <div class="lang-toggle">
-        <button id="langDA" class="active" onclick="setLang('da')">Dansk</button>
-        <button id="langEN" onclick="setLang('en')">English</button>
+    </div>
+
+    <div class="modal-foot">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="lang-toggle">
+          <button id="langDA" class="active" onclick="setLang('da')">Dansk</button>
+          <button id="langEN" onclick="setLang('en')">English</button>
+        </div>
+        <div id="tabProgressText" style="font-size:12px;color:var(--muted);display:none;"></div>
       </div>
       <div class="foot-actions">
-        <button class="btn-secondary" onclick="refreshPreview()">↻ Opdater visning</button>
+        <button class="btn-secondary" id="btnUpdatePreview" onclick="refreshPreview()">↻ Opdater visning</button>
         <button class="btn-send" id="sendBtn" onclick="sendEmail()">✉ Send email</button>
       </div>
     </div>
@@ -701,6 +760,8 @@
   let allReports = [];
   let currentReport = null;
   let currentLang = 'da';
+  let sponsorTabs = [];       // [{name, email, lang, sent, message}]
+  let currentTabIdx = 0;
 
   // ============================================================
   // LOGIN
@@ -1026,7 +1087,7 @@
             ${r.goodThing ? `<div class="quote-block"><span class="quote-label">${ui[currentLang].goodThing}</span>${esc(r.goodThing)}</div>` : ''}
           </div>
           <div class="card-foot">
-            <button class="compose-btn" id="composeBtn" onclick="openComposer(${realIdx})">${ui[currentLang].writeTo}</button>
+            <button class="compose-btn" id="composeBtn" onclick="openComposer(${realIdx})">${r.sponsorName && r.sponsorName.split(' / ').length > 1 ? ('\u2709 Skriv til ' + r.sponsorName.split(' / ').length + ' sponsorer') : ui[currentLang].writeTo}</button>
           </div>
         </div>`;
     });
@@ -1074,23 +1135,113 @@
     }
   }
 
-    function openComposer(idx) {
+    function parseSponsorData(nameStr, emailStr) {
+    const names = (nameStr || '').split(' / ').map(s => s.trim()).filter(Boolean);
+    const emails = (emailStr || '').split(' / ').map(s => s.trim()).filter(Boolean);
+    return names.map((name, i) => ({
+      name: name,
+      email: emails[i] || '',
+      lang: 'da',
+      sent: false,
+      message: ''
+    }));
+  }
+
+  function openComposer(idx) {
     currentReport = allReports[idx];
     const r = currentReport;
+    currentTabIdx = 0;
+
+    // Parse sponsors
+    sponsorTabs = parseSponsorData(r.sponsorName, r.sponsorEmail);
+    if (sponsorTabs.length === 0) {
+      sponsorTabs = [{ name: r.sponsorName || '', email: r.sponsorEmail || '', lang: 'da', sent: false, message: '' }];
+    }
 
     document.getElementById('modalTitle').textContent = ui[currentLang].modalTitle + ' ' + (r.childName || '');
-    document.getElementById('recipientName').value = '';
-    
     document.getElementById('emailSubject').value = 'Opdatering fra dit sponsor barn';
-    document.getElementById('recipientName').value = r.sponsorName || '';
     document.getElementById('senderName').value = '';
-    document.getElementById('personalMessage').value = '';
 
-    // Build ref box using shared function so it rebuilds on language switch
+    // Show/hide sponsor badge and tabs
+    const multiSponsor = sponsorTabs.length > 1;
+    const badgeArea = document.getElementById('sponsorBadgeArea');
+    const tabsArea = document.getElementById('sponsorTabsArea');
+    const progressText = document.getElementById('tabProgressText');
+
+    if (multiSponsor) {
+      badgeArea.style.display = 'flex';
+      document.getElementById('sponsorBadgeText').textContent =
+        'Dette barn har ' + sponsorTabs.length + ' sponsorer — send én email pr. sponsor';
+      tabsArea.style.display = 'flex';
+      progressText.style.display = 'block';
+      renderSponsorTabs();
+    } else {
+      badgeArea.style.display = 'none';
+      tabsArea.style.display = 'none';
+      progressText.style.display = 'none';
+    }
+
+    loadTabData(0);
     buildRefBox();
-
     document.getElementById('modalOverlay').classList.add('open');
     refreshPreview();
+  }
+
+  function renderSponsorTabs() {
+    const area = document.getElementById('sponsorTabsArea');
+    area.innerHTML = '';
+    sponsorTabs.forEach(function(sp, i) {
+      const btn = document.createElement('button');
+      btn.className = 'sponsor-tab-btn' + (i === currentTabIdx ? ' active' : '');
+      btn.onclick = function() { saveTabData(); switchSponsorTab(i); };
+
+      const avatar = document.createElement('div');
+      avatar.className = 'tab-avatar';
+      avatar.textContent = sp.name.charAt(0).toUpperCase();
+
+      btn.appendChild(avatar);
+      btn.appendChild(document.createTextNode(' ' + sp.name));
+
+      if (sp.sent) {
+        const tick = document.createElement('div');
+        tick.className = 'tab-sent-tick';
+        tick.textContent = '✓';
+        btn.appendChild(tick);
+      }
+      area.appendChild(btn);
+    });
+  }
+
+  function saveTabData() {
+    if (!sponsorTabs[currentTabIdx]) return;
+    sponsorTabs[currentTabIdx].message = document.getElementById('personalMessage').value;
+    sponsorTabs[currentTabIdx].lang = currentLang;
+  }
+
+  function loadTabData(idx) {
+    currentTabIdx = idx;
+    const sp = sponsorTabs[idx];
+    document.getElementById('recipientName').value = sp.name || '';
+    document.getElementById('personalMessage').value = sp.message || '';
+    if (sp.lang && sp.lang !== currentLang) setLang(sp.lang);
+    updateTabProgress();
+    refreshPreview();
+  }
+
+  function switchSponsorTab(idx) {
+    currentTabIdx = idx;
+    renderSponsorTabs();
+    loadTabData(idx);
+  }
+
+  function updateTabProgress() {
+    if (sponsorTabs.length <= 1) return;
+    const sp = sponsorTabs[currentTabIdx];
+    const sentCount = sponsorTabs.filter(s => s.sent).length;
+    document.getElementById('tabProgressText').innerHTML =
+      'Email <strong>' + (currentTabIdx + 1) + '</strong> af <strong>' + sponsorTabs.length + '</strong> — ' +
+      (sp.sent ? '<span style="color:#4A7C59">✓ Sendt</span>' : 'ikke sendt endnu') +
+      ' (' + sentCount + '/' + sponsorTabs.length + ' sendt)';
   }
 
   function closeModal() {
@@ -1099,7 +1250,9 @@
   }
 
   function setLang(lang) {
+    if (typeof lang !== 'string') return;
     currentLang = lang;
+    if (sponsorTabs[currentTabIdx]) sponsorTabs[currentTabIdx].lang = lang;
     applyUILang();
     refreshPreview();
   }
@@ -1109,7 +1262,8 @@
   // ============================================================
   function buildEmailHtml() {
     const r = currentReport || {};
-    const name = document.getElementById('recipientName').value.trim() || (currentLang === 'da' ? 'Kære sponsor' : 'Dear sponsor');
+    const tabSp = sponsorTabs[currentTabIdx] || {};
+    const name = document.getElementById('recipientName').value.trim() || tabSp.name || (currentLang === 'da' ? 'Kære sponsor' : 'Dear sponsor');
     const message = document.getElementById('personalMessage').value.trim();
     const senderName = document.getElementById('senderName').value.trim() || 'MBU-teamet';
     const childName = r.childName || '';
@@ -1215,7 +1369,9 @@
   // SEND EMAIL
   // ============================================================
   async function sendEmail() {
-    const email = currentReport.sponsorEmail || '';
+    saveTabData();
+    const sp = sponsorTabs[currentTabIdx] || {};
+    const email = sp.email || '';
     const subject = document.getElementById('emailSubject').value.trim();
     const message = document.getElementById('personalMessage').value.trim();
     const sender = document.getElementById('senderName').value.trim();
@@ -1250,6 +1406,15 @@
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formBody
       });
+      sponsorTabs[currentTabIdx].sent = true;
+      if (sponsorTabs.length > 1) {
+        renderSponsorTabs();
+        updateTabProgress();
+        showToast('✓ Email sendt til ' + email);
+        sendBtn.disabled = false;
+        sendBtn.textContent = ui[currentLang].sendBtn;
+        return;
+      }
       showToast('✓ Email sendt til ' + email);
       setTimeout(closeModal, 1200);
     } catch (err) {
