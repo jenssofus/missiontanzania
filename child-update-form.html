@@ -135,6 +135,33 @@
 
   .section.active { display: block; }
 
+  /* Mandatory field error state */
+  .field-error input,
+  .field-error textarea,
+  .field-error .chip-group,
+  .field-error .star-group {
+    animation: shake 0.4s ease;
+  }
+  .field-error input,
+  .field-error textarea {
+    border-color: var(--terracotta) !important;
+    box-shadow: 0 0 0 3px rgba(193,68,14,0.15) !important;
+  }
+  .field-error-msg {
+    color: var(--terracotta);
+    font-size: 11px;
+    margin-top: 5px;
+    display: none;
+  }
+  .field-error .field-error-msg { display: block; }
+  .chip-error .chip label { border-color: var(--terracotta) !important; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-5px); }
+    40%,80% { transform: translateX(5px); }
+  }
+
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -468,6 +495,84 @@
   }
 
   select option { background: #fff; }
+
+  /* Searchable dropdown */
+  .search-dropdown { position: relative; }
+
+  .search-dropdown input[type="text"] {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-dropdown input[type="text"]:focus {
+    border-color: var(--earth);
+    box-shadow: 0 0 0 3px rgba(92,61,46,0.1);
+  }
+
+  .dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: #fff;
+    border: 1.5px solid var(--earth);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(92,61,46,0.15);
+  }
+
+  .dropdown-item {
+    padding: 11px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  .dropdown-item:last-child { border-bottom: none; }
+  .dropdown-item:hover { background: var(--sand); }
+  .dropdown-item.no-result { color: var(--muted); font-style: italic; cursor: default; }
+  .dropdown-item.no-result:hover { background: #fff; }
+
+  .dropdown-loading {
+    padding: 11px 14px;
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .dropdown-selected {
+    margin-top: 8px;
+    background: var(--sage);
+    color: #fff;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dropdown-selected button {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 0;
+    line-height: 1;
+  }
 </style>
 </head>
 <body>
@@ -500,7 +605,14 @@
 
       <div class="q-block">
         <div class="q-label">Child's full name <span class="req">*</span></div>
-        <input type="text" id="childName" placeholder="e.g. Amina Juma" />
+        <div class="q-sub">Start typing to search for the child</div>
+        <div class="search-dropdown" id="nameDropdown">
+          <input type="text" id="childNameSearch" placeholder="Type name to search…" autocomplete="off" oninput="filterNames()" onfocus="showDropdown()" />
+          <input type="hidden" id="childName" />
+          <div class="dropdown-list" id="dropdownList" style="display:none;"></div>
+          <div class="dropdown-loading" id="dropdownLoading" style="display:none;">Loading names…</div>
+          <div class="dropdown-selected" id="dropdownSelected" style="display:none;"></div>
+        </div>
       </div>
 
       <div class="q-block">
@@ -541,12 +653,13 @@
 
       <div class="q-block">
         <div class="q-label">How is the child's health right now? <span class="req">*</span></div>
-        <div class="chip-group">
+        <div class="chip-group" id="healthGroup">
           <div class="chip"><input type="radio" name="health" id="h1" value="Very good"><label for="h1">😊 Very good</label></div>
           <div class="chip"><input type="radio" name="health" id="h2" value="Good"><label for="h2">🙂 Good</label></div>
           <div class="chip"><input type="radio" name="health" id="h3" value="Getting better"><label for="h3">📈 Getting better</label></div>
           <div class="chip"><input type="radio" name="health" id="h4" value="Needs care"><label for="h4">🏥 Needs care</label></div>
         </div>
+        <div class="field-error-msg" id="healthError">Please select a health status.</div>
       </div>
 
       <div class="divider"></div>
@@ -590,12 +703,13 @@
 
       <div class="q-block">
         <div class="q-label">Is the child going to school regularly? <span class="req">*</span></div>
-        <div class="chip-group">
+        <div class="chip-group" id="schoolGroup">
           <div class="chip"><input type="radio" name="school" id="s1" value="Yes, every day"><label for="s1">✅ Yes, every day</label></div>
           <div class="chip"><input type="radio" name="school" id="s2" value="Most days"><label for="s2">📅 Most days</label></div>
           <div class="chip"><input type="radio" name="school" id="s3" value="Sometimes"><label for="s3">⚠️ Sometimes</label></div>
           <div class="chip"><input type="radio" name="school" id="s4" value="Not in school"><label for="s4">❗ Not in school</label></div>
         </div>
+        <div class="field-error-msg" id="schoolError">Please select a school attendance option.</div>
       </div>
 
       <div class="divider"></div>
@@ -657,11 +771,12 @@
 
       <div class="q-block">
         <div class="q-label">How is the child's situation at home right now? <span class="req">*</span></div>
-        <div class="chip-group">
+        <div class="chip-group" id="homeGroup">
           <div class="chip"><input type="radio" name="homeLife" id="hl1" value="Stable and good"><label for="hl1">🏠 Stable and good</label></div>
           <div class="chip"><input type="radio" name="homeLife" id="hl2" value="Okay, some challenges"><label for="hl2">🤝 Okay, some challenges</label></div>
           <div class="chip"><input type="radio" name="homeLife" id="hl3" value="Difficult right now"><label for="hl3">⚠️ Difficult right now</label></div>
         </div>
+        <div class="field-error-msg" id="homeError">Please select a home situation.</div>
       </div>
 
       <div class="divider"></div>
@@ -764,10 +879,15 @@
 </div><!-- /form-body -->
 
 <script>
+  // ── CONFIG ──────────────────────────────────────────────────
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxj-nQP1vdBAdDdrUtMRYJDZjYocDVNGHNpy73LKl785DCSNkENhvjJDIc65ZWIrS-L/exec";
+
   let currentSection = 1;
   const totalSections = 5;
+  let childNames = [];
+  let selectedChildName = '';
 
-  // Build step dots
+  // ── STEP DOTS ────────────────────────────────────────────────
   const dotsContainer = document.getElementById('dots');
   for (let i = 1; i <= totalSections; i++) {
     const dot = document.createElement('div');
@@ -776,7 +896,6 @@
     dotsContainer.appendChild(dot);
   }
 
-  // Update progress
   function updateProgress(step) {
     const pct = ((step - 1) / (totalSections - 1)) * 100;
     document.getElementById('progressFill').style.width = pct + '%';
@@ -787,39 +906,162 @@
     }
   }
 
+  // ── SEARCHABLE DROPDOWN ──────────────────────────────────────
+  async function loadChildNames() {
+    const loadingEl = document.getElementById('dropdownLoading');
+    const searchInput = document.getElementById('childNameSearch');
+    loadingEl.style.display = 'block';
+    try {
+      const res = await fetch(APPS_SCRIPT_URL + '?action=children');
+      const data = await res.json();
+      if (data.status === 'success' && data.children && data.children.length > 0) {
+        childNames = data.children;
+        searchInput.placeholder = 'Type name to search…';
+      } else {
+        // Names loaded but empty — allow free text
+        enableFreeText(searchInput);
+      }
+    } catch (err) {
+      // Network error or CORS — fall back to free text input
+      console.log('Could not load child names, using free text:', err);
+      enableFreeText(searchInput);
+    }
+    loadingEl.style.display = 'none';
+  }
+
+  function enableFreeText(input) {
+    // Fallback: let TZ staff type the name freely if list can't be loaded
+    input.placeholder = 'Type child name here…';
+    input.oninput = function() {
+      selectedChildName = input.value.trim();
+      document.getElementById('childName').value = selectedChildName;
+    };
+    input.removeAttribute('oninput');
+    input.addEventListener('input', function() {
+      selectedChildName = input.value.trim();
+      document.getElementById('childName').value = selectedChildName;
+    });
+    // Show a small note
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:11px;color:var(--muted);margin-top:4px;font-style:italic;';
+    note.textContent = 'Name list unavailable — please type carefully.';
+    input.parentNode.appendChild(note);
+  }
+
+  function filterNames() {
+    const query = document.getElementById('childNameSearch').value.toLowerCase().trim();
+    const list = document.getElementById('dropdownList');
+
+    if (!query) { list.style.display = 'none'; return; }
+
+    const matches = childNames.filter(n => n.toLowerCase().includes(query));
+    list.innerHTML = '';
+
+    if (matches.length === 0) {
+      list.innerHTML = '<div class="dropdown-item no-result">No child found — check spelling</div>';
+    } else {
+      matches.forEach(name => {
+        const item = document.createElement('div');
+        item.className = 'dropdown-item';
+        item.textContent = name;
+        item.onclick = () => selectChild(name);
+        list.appendChild(item);
+      });
+    }
+    list.style.display = 'block';
+  }
+
+  function showDropdown() {
+    if (document.getElementById('childNameSearch').value.trim()) {
+      filterNames();
+    }
+  }
+
+  function selectChild(name) {
+    selectedChildName = name;
+    document.getElementById('childName').value = name;
+    document.getElementById('childNameSearch').value = name;
+    document.getElementById('dropdownList').style.display = 'none';
+    const sel = document.getElementById('dropdownSelected');
+    sel.style.display = 'inline-flex';
+    sel.innerHTML = '✓ ' + name + ' <button onclick="clearChild()" title="Clear">✕</button>';
+    document.getElementById('childNameSearch').disabled = true;
+  }
+
+  function clearChild() {
+    selectedChildName = '';
+    document.getElementById('childName').value = '';
+    document.getElementById('childNameSearch').value = '';
+    document.getElementById('childNameSearch').disabled = false;
+    document.getElementById('dropdownSelected').style.display = 'none';
+    document.getElementById('childNameSearch').focus();
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('nameDropdown').contains(e.target)) {
+      document.getElementById('dropdownList').style.display = 'none';
+    }
+  });
+
+  // ── FIELD VALIDATION HELPERS ─────────────────────────────────
+  function showFieldError(elementId, errorId) {
+    const el = document.getElementById(elementId);
+    const err = document.getElementById(errorId);
+    if (el) el.closest('.q-block').classList.add('field-error');
+    if (err) err.style.display = 'block';
+  }
+
+  function clearFieldErrors() {
+    document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+    document.querySelectorAll('.field-error-msg').forEach(el => el.style.display = 'none');
+  }
+
+  // ── NAVIGATION ───────────────────────────────────────────────
   function nextSection(from) {
-    // Basic required field check
+    clearFieldErrors();
+    let valid = true;
+
     if (from === 1) {
-      const name = document.getElementById('childName').value.trim();
-      const date = document.getElementById('reportDate').value;
-      const staff = document.getElementById('staffName').value.trim();
-      if (!name || !date || !staff) {
-        alert('Please fill in the child name, date, and your name before continuing.');
+      if (!selectedChildName) {
+        document.getElementById('childNameSearch').style.borderColor = 'var(--terracotta)';
+        document.getElementById('childNameSearch').style.boxShadow = '0 0 0 3px rgba(193,68,14,0.15)';
+        valid = false;
+      }
+      if (!document.getElementById('reportDate').value) {
+        document.getElementById('reportDate').closest('.q-block').classList.add('field-error');
+        valid = false;
+      }
+      if (!document.getElementById('staffName').value.trim()) {
+        document.getElementById('staffName').closest('.q-block').classList.add('field-error');
+        valid = false;
+      }
+      if (!valid) {
+        alert('Please fill in all required fields before continuing.');
         return;
       }
     }
+
     if (from === 2) {
       const health = document.querySelector('input[name="health"]:checked');
       const eating = document.querySelector('input[name="eating"]:checked');
-      if (!health || !eating) {
-        alert('Please answer the health questions before continuing.');
-        return;
-      }
+      if (!health) { showFieldError('healthGroup', 'healthError'); valid = false; }
+      if (!eating) { valid = false; }
+      if (!valid) { alert('Please answer the health questions before continuing.'); return; }
     }
+
     if (from === 3) {
       const school = document.querySelector('input[name="school"]:checked');
       const rating = document.querySelector('input[name="schoolRating"]:checked');
-      if (!school || !rating) {
-        alert('Please answer both school questions before continuing.');
-        return;
-      }
+      if (!school) { showFieldError('schoolGroup', 'schoolError'); valid = false; }
+      if (!rating) { valid = false; }
+      if (!valid) { alert('Please answer the school questions before continuing.'); return; }
     }
+
     if (from === 4) {
       const home = document.querySelector('input[name="homeLife"]:checked');
-      if (!home) {
-        alert('Please answer the home situation question.');
-        return;
-      }
+      if (!home) { showFieldError('homeGroup', 'homeError'); valid = false; }
+      if (!valid) { alert('Please select the home situation before continuing.'); return; }
     }
 
     document.getElementById('section-' + from).classList.remove('active');
@@ -830,6 +1072,7 @@
   }
 
   function prevSection(from) {
+    clearFieldErrors();
     document.getElementById('section-' + from).classList.remove('active');
     currentSection = from - 1;
     document.getElementById('section-' + currentSection).classList.add('active');
@@ -837,19 +1080,17 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // -------------------------------------------------------
-  // PASTE YOUR APPS SCRIPT WEB APP URL HERE after deploying
-  // -------------------------------------------------------
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxj-nQP1vdBAdDdrUtMRYJDZjYocDVNGHNpy73LKl785DCSNkENhvjJDIc65ZWIrS-L/exec";
-
+  // ── SUBMIT ───────────────────────────────────────────────────
   async function submitForm() {
+    clearFieldErrors();
     const goodThing = document.getElementById('goodThing').value.trim();
     if (!goodThing) {
+      document.getElementById('goodThing').closest('.q-block').classList.add('field-error');
+      document.getElementById('goodThingError').style.display = 'block';
       alert('Please share one good thing about the child before submitting.');
       return;
     }
 
-    // Collect all form data
     const data = {
       reportDate:        document.getElementById('reportDate').value,
       childName:         document.getElementById('childName').value.trim(),
@@ -872,13 +1113,11 @@
       photo1: "", photo2: "", photo3: ""
     };
 
-    // Show loading state
     const submitBtn = document.querySelector('.btn-submit');
     submitBtn.textContent = 'Submitting…';
     submitBtn.disabled = true;
 
     try {
-      // Apps Script requires form-encoded data with no-cors
       const formBody = Object.keys(data)
         .map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
         .join('&');
@@ -893,7 +1132,6 @@
       console.log('Submission sent:', err);
     }
 
-    // Show success screen
     for (let i = 1; i <= totalSections; i++) {
       const s = document.getElementById('section-' + i);
       if (s) s.classList.remove('active');
@@ -909,6 +1147,8 @@
     document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(el => el.value = '');
     document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
     document.getElementById('photoPreview').innerHTML = '';
+    clearChild();
+    clearFieldErrors();
     currentSection = 1;
     document.getElementById('section-1').classList.add('active');
     updateProgress(1);
@@ -931,11 +1171,11 @@
     });
   }
 
-  // Set today's date as default
+  // ── INIT ─────────────────────────────────────────────────────
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('reportDate').value = today;
-
   updateProgress(1);
+  loadChildNames();
 </script>
 </body>
 </html>
