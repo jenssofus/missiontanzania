@@ -614,6 +614,82 @@
     justify-content: center;
   }
 
+  /* ── CATEGORY COLOURS ── */
+  :root {
+    --c-rosabella: #7B2D8B; --c-primary: #2A6B3F;
+    --c-secondary: #1A4F8A; --c-college: #A07820; --c-tumaini: #E8691A;
+  }
+
+  /* Search bar */
+  .search-wrap { padding: 14px 28px 0; }
+  .search-input-wrap { position: relative; max-width: 420px; }
+  .search-icon-lbl { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--muted); pointer-events: none; }
+  .search-input { width: 100%; padding: 9px 100px 9px 34px; border: 1.5px solid var(--line); border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 13px; background: var(--card); outline: none; color: var(--ink); transition: border-color 0.2s; }
+  .search-input:focus { border-color: var(--acacia); box-shadow: 0 0 0 3px rgba(58,107,71,0.1); }
+  .search-count-lbl { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .search-banner { display: none; margin: 8px 28px 0; padding: 6px 14px; background: rgba(58,107,71,0.1); border: 1px solid rgba(58,107,71,0.2); border-radius: 8px; font-size: 12px; color: var(--acacia-deep); }
+  .search-banner.visible { display: block; }
+
+  /* Category tabs */
+  .cat-tabs { display: flex; padding: 0 28px; border-bottom: 2px solid var(--line); overflow-x: auto; margin-top: 12px; }
+  .cat-tab { display: inline-flex; align-items: center; gap: 6px; padding: 11px 16px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 500; color: var(--muted); border: none; background: none; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; transition: all 0.2s; }
+  .cat-tab:hover { color: var(--ink); }
+  .cat-tab.active { color: var(--ink); }
+  .cat-tab[data-cat="all"].active    { border-bottom-color: var(--acacia); }
+  .cat-tab[data-cat="rosabella"].active { border-bottom-color: var(--c-rosabella); color: var(--c-rosabella); }
+  .cat-tab[data-cat="primary"].active   { border-bottom-color: var(--c-primary); color: var(--c-primary); }
+  .cat-tab[data-cat="secondary"].active { border-bottom-color: var(--c-secondary); color: var(--c-secondary); }
+  .cat-tab[data-cat="college"].active   { border-bottom-color: var(--c-college); color: var(--c-college); }
+  .cat-tab[data-cat="mix"].active       { border-bottom-color: var(--c-rosabella); color: var(--c-rosabella); }
+  .cat-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .cat-count-badge { background: var(--paper-deep); border-radius: 10px; padding: 1px 6px; font-size: 10px; color: var(--muted); }
+  .cat-tab.active .cat-count-badge { color: #fff; }
+  .cat-tab[data-cat="all"].active .cat-count-badge    { background: var(--acacia); }
+  .cat-tab[data-cat="rosabella"].active .cat-count-badge { background: var(--c-rosabella); }
+  .cat-tab[data-cat="primary"].active .cat-count-badge   { background: var(--c-primary); }
+  .cat-tab[data-cat="secondary"].active .cat-count-badge { background: var(--c-secondary); }
+  .cat-tab[data-cat="college"].active .cat-count-badge   { background: var(--c-college); }
+  .cat-tab[data-cat="mix"].active .cat-count-badge       { background: var(--c-rosabella); }
+
+  /* Class chips */
+  .class-chips-wrap { padding: 10px 28px 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 42px; }
+  .chips-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  .cls-chip { padding: 4px 12px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--card); font-family: 'Outfit', sans-serif; font-size: 11px; color: var(--muted); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .cls-chip:hover { border-color: var(--acacia); color: var(--acacia); }
+  .cls-chip.active { background: var(--acacia); border-color: var(--acacia); color: #fff; font-weight: 500; }
+  .chip-div { width: 1px; height: 18px; background: var(--line); margin: 0 4px; flex-shrink: 0; }
+  .voc-select { padding: 4px 10px; border: 1.5px solid var(--line); border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 11px; background: var(--card); color: var(--ink); outline: none; }
+  .voc-select:focus { border-color: var(--c-college); }
+
+  /* Colored card headers */
+  .card-top { padding: 16px 18px 14px; color: #fff; position: relative; }
+  .card-top.cat-rosabella { background: linear-gradient(135deg, var(--c-rosabella) 0%, #5A1A6B 100%); }
+  .card-top.cat-primary   { background: linear-gradient(135deg, var(--c-primary) 0%, #1A4F2A 100%); }
+  .card-top.cat-secondary { background: linear-gradient(135deg, var(--c-secondary) 0%, #0F3060 100%); }
+  .card-top.cat-college   { background: linear-gradient(135deg, var(--c-college) 0%, #7A5810 100%); }
+  .card-top.cat-mix       { background: linear-gradient(135deg, var(--c-rosabella) 0%, var(--c-rosabella) 40%, var(--c-primary) 60%, #1A4F2A 100%); }
+
+  /* Card badges */
+  .c-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 9px; white-space: nowrap; display: inline-block; }
+  .cbadge-rosabella { background: rgba(255,255,255,0.22); color: #f0c8f8; }
+  .cbadge-primary   { background: rgba(255,255,255,0.18); color: rgba(255,255,255,0.9); }
+  .cbadge-secondary { background: rgba(255,255,255,0.18); color: #b8d8f8; }
+  .cbadge-college   { background: rgba(255,255,255,0.18); color: #f8e8a0; }
+  .cbadge-mix       { background: rgba(255,255,255,0.22); color: #f0e0ff; }
+  .cbadge-tumaini   { background: rgba(232,105,26,0.45); color: #ffd4a8; border: 1px solid rgba(232,105,26,0.5); }
+  .cbadge-class     { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.85); }
+
+  /* Sponsor popover */
+  .sponsor-tag { margin-top: 7px; background: rgba(255,255,255,0.15); border-radius: 5px; padding: 4px 9px; font-size: 11px; color: rgba(255,255,255,0.9); display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: background 0.15s; position: relative; user-select: none; }
+  .sponsor-tag:hover { background: rgba(255,255,255,0.25); }
+  .sponsor-tag .s-arrow { font-size: 9px; opacity: 0.7; }
+  .sponsor-popover { display: none; position: absolute; top: calc(100% + 6px); left: 0; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; min-width: 220px; max-width: 280px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 200; color: var(--ink); }
+  .sponsor-popover.open { display: block; }
+  .sp-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+  .sp-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
+  .sp-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .sp-av { width: 22px; height: 22px; border-radius: 50%; background: var(--acacia); color: #fff; font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
   @media (max-width: 720px) {
     .modal-body { grid-template-columns: 1fr; }
     .topbar-stats { display: none; }
@@ -665,6 +741,29 @@
     <button class="refresh-btn" id="refreshBtn" onclick="loadReports()">↻ Opdater</button>
   </div>
   <div class="page-sub" id="pageSub">Rapporter indsendt af TZ-teamet. Vælg et barn for at skrive en personlig opdatering til sponsoren.</div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <div class="search-input-wrap">
+      <span class="search-icon-lbl">🔍</span>
+      <input type="text" class="search-input" id="dashSearch" placeholder="Søg barn, sponsor eller vocation…" oninput="applyFilters()" />
+      <span class="search-count-lbl" id="dashSearchCount"></span>
+    </div>
+  </div>
+  <div class="search-banner" id="dashSearchBanner">🔍 Søger på tværs af alle kategorier</div>
+
+  <!-- Category tabs -->
+  <div class="cat-tabs">
+    <button class="cat-tab active" onclick="setCat('all',this)" data-cat="all">Alle <span class="cat-count-badge" id="cnt-all">0</span></button>
+    <button class="cat-tab" onclick="setCat('rosabella',this)" data-cat="rosabella"><span class="cat-dot" style="background:var(--c-rosabella)"></span>Rosabella <span class="cat-count-badge" id="cnt-rosabella">0</span></button>
+    <button class="cat-tab" onclick="setCat('primary',this)" data-cat="primary"><span class="cat-dot" style="background:var(--c-primary)"></span>Primary <span class="cat-count-badge" id="cnt-primary">0</span></button>
+    <button class="cat-tab" onclick="setCat('secondary',this)" data-cat="secondary"><span class="cat-dot" style="background:var(--c-secondary)"></span>Secondary <span class="cat-count-badge" id="cnt-secondary">0</span></button>
+    <button class="cat-tab" onclick="setCat('college',this)" data-cat="college"><span class="cat-dot" style="background:var(--c-college)"></span>College <span class="cat-count-badge" id="cnt-college">0</span></button>
+    <button class="cat-tab" onclick="setCat('mix',this)" data-cat="mix"><span class="cat-dot" style="background:linear-gradient(90deg,var(--c-rosabella),var(--c-primary))"></span>Rosabella+Primary <span class="cat-count-badge" id="cnt-mix">0</span></button>
+  </div>
+
+  <!-- Class chips -->
+  <div class="class-chips-wrap" id="classChipsWrap"></div>
 
   <div id="reportsArea">
     <div class="state-msg">
@@ -762,10 +861,108 @@
   let currentLang = 'da';
   let sponsorTabs = [];       // [{name, email, lang, sent, message}]
   let currentTabIdx = 0;
+  let activeCat = 'all';
+  let activeCls = 'all';
+  let activeVoc = 'all';
 
   // ============================================================
   // LOGIN
   // ============================================================
+  // ============================================================
+  // CATEGORY & FILTER FUNCTIONS
+  // ============================================================
+  function setCat(cat, btn) {
+    activeCat = cat; activeCls = 'all'; activeVoc = 'all';
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    buildClassChips();
+    applyFilters();
+  }
+
+  function setCls(cls, btn) {
+    activeCls = cls; activeVoc = 'all';
+    document.querySelectorAll('.cls-chip').forEach(c => c.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    applyFilters();
+  }
+
+  function setVoc(val) { activeVoc = val; activeCls = 'all'; applyFilters(); }
+
+  function buildClassChips() {
+    const wrap = document.getElementById('classChipsWrap');
+    if (!wrap) return;
+    if (activeCat === 'college') {
+      const vocs = [...new Set(allReports.filter(r => r.category === 'college').map(r => r.vocation).filter(Boolean))].sort();
+      wrap.innerHTML = '<span class="chips-lbl">Vocation:</span>' +
+        '<select class="voc-select" onchange="setVoc(this.value)">' +
+        '<option value="all">Alle</option>' +
+        vocs.map(v => `<option value="${v}">${v}</option>`).join('') + '</select>';
+      return;
+    }
+    const relevant = activeCat === 'all' ? allReports.filter(r => r.category !== 'college') : allReports.filter(r => r.category === activeCat);
+    const clsOrder = ['STD I','STD II','STD III','STD IV','STD V','STD VI','STD VII','Form I','Form II','Form III','Form IV'];
+    const classes = [...new Set(relevant.map(r => r.grade).filter(Boolean))].sort((a,b) => {
+      const ai = clsOrder.indexOf(a), bi = clsOrder.indexOf(b);
+      return (ai===-1?99:ai)-(bi===-1?99:bi);
+    });
+    let html = '<span class="chips-lbl">Klasse:</span>' +
+      `<button class="cls-chip active" onclick="setCls('all',this)">Alle</button>`;
+    if (activeCat !== 'all' && classes.length > 0) {
+      html += '<div class="chip-div"></div>';
+      classes.forEach(cls => { html += `<button class="cls-chip" onclick="setCls('${cls}',this)">${cls}</button>`; });
+    }
+    if (['primary','rosabella','mix'].includes(activeCat)) {
+      html += '<div class="chip-div"></div>';
+      html += `<button class="cls-chip" onclick="setCls('tumaini',this)" style="border-color:var(--c-tumaini);color:var(--c-tumaini);">⭐ Tumaini</button>`;
+    }
+    wrap.innerHTML = html;
+  }
+
+  function updateCatCounts() {
+    const counts = { all:0, rosabella:0, primary:0, secondary:0, college:0, mix:0 };
+    allReports.forEach(r => { counts.all++; if (counts[r.category]!==undefined) counts[r.category]++; });
+    Object.keys(counts).forEach(k => { const el = document.getElementById('cnt-'+k); if (el) el.textContent = counts[k]; });
+  }
+
+  function applyFilters() {
+    const query = (document.getElementById('dashSearch')?.value || '').toLowerCase().trim();
+    const isSearching = query.length > 0;
+    const banner = document.getElementById('dashSearchBanner');
+    if (banner) banner.classList.toggle('visible', isSearching);
+    let visible = 0;
+    document.querySelectorAll('#reportsArea .report-card').forEach(card => {
+      let show;
+      if (isSearching) {
+        show = (card.dataset.name||'').includes(query) ||
+               (card.dataset.sponsor||'').includes(query) ||
+               (card.dataset.vocation||'').includes(query);
+      } else {
+        const catOk = activeCat === 'all' || card.dataset.cat === activeCat;
+        let clsOk = true;
+        if (activeCls === 'tumaini') clsOk = card.dataset.tumaini === 'true';
+        else if (activeCls !== 'all') clsOk = card.dataset.cls === activeCls;
+        const vocOk = activeVoc === 'all' || card.dataset.vocation === activeVoc;
+        show = catOk && clsOk && vocOk;
+      }
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    const sc = document.getElementById('dashSearchCount');
+    if (sc) sc.textContent = isSearching ? visible + ' fundet' : '';
+  }
+
+  function toggleSponsorList(e, id) {
+    e.stopPropagation();
+    const pop = document.getElementById(id);
+    const isOpen = pop.classList.contains('open');
+    document.querySelectorAll('.sponsor-popover.open').forEach(p => p.classList.remove('open'));
+    if (!isOpen) pop.classList.add('open');
+  }
+
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.sponsor-popover.open').forEach(p => p.classList.remove('open'));
+  });
+
   // ============================================================
   // UI TRANSLATIONS
   // ============================================================
@@ -1048,9 +1245,26 @@
     return 'pill-low';
   }
 
+  function buildSponsorBadge(r, idx) {
+    if (!r.sponsorName) return `<div style="margin-top:7px;font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;">${ui[currentLang].noSponsor}</div>`;
+    const names = r.sponsorName.split(' / ');
+    const popId = 'spop-' + idx;
+    const popItems = names.map(n => `<div class="sp-item"><div class="sp-av">${n.charAt(0).toUpperCase()}</div><span>${esc(n)}</span></div>`).join('');
+    const label = names.length > 1 ? '👥 ' + names.length + ' sponsorer' : '👤 ' + esc(names[0]);
+    const title = names.length > 1 ? 'Sponsorer' : 'Sponsor';
+    return `<div class="sponsor-tag" onclick="toggleSponsorList(event,'${popId}')">
+      ${label} <span class="s-arrow">▾</span>
+      <div class="sponsor-popover" id="${popId}">
+        <div class="sp-title">${title}</div>${popItems}
+      </div>
+    </div>`;
+  }
+
   function renderReports() {
     const area = document.getElementById('reportsArea');
     document.getElementById('statTotal').textContent = allReports.length;
+    updateCatCounts();
+    buildClassChips();
 
     if (allReports.length === 0) {
       area.innerHTML = '<div class="state-msg"><div class="big">📭</div><div class="txt">Ingen rapporter endnu. Når TZ-teamet indsender en rapport, vises den her.</div></div>';
@@ -1061,38 +1275,51 @@
     allReports.slice().reverse().forEach(function(r, idx) {
       const realIdx = allReports.length - 1 - idx;
       html += `
-        <div class="report-card">
-          <div class="card-top">
-            <div class="card-child-name">${esc(r.childName) || ui[currentLang].unknownChild}</div>
-            <div class="card-meta">${ui[currentLang].report}: ${esc(r.reportDate) || '—'} · ${ui[currentLang].submitted} ${esc(r.timestamp)}</div>
-            <div class="card-meta" style="margin-top:3px;">${ui[currentLang].submittedBy}: ${esc(r.staffName) || ui[currentLang].unknown}</div>
-            ${r.sponsorName ? '<div style="margin-top:8px;background:rgba(201,154,62,0.18);border-radius:6px;padding:5px 10px;font-size:12px;color:#f4eee2;">👤 ' + ui[currentLang].sponsor + ': ' + esc(r.sponsorName) + '</div>' : '<div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,0.4);font-style:italic;">' + ui[currentLang].noSponsor + '</div>'}
+        <div class="report-card"
+          data-cat="${r.category || 'primary'}"
+          data-cls="${esc(r.grade || '')}"
+          data-tumaini="${r.tumaini ? 'true' : 'false'}"
+          data-vocation="${esc(r.vocation || '')}"
+          data-name="${esc((r.childName || '').toLowerCase())}"
+          data-sponsor="${esc((r.sponsorName || '').toLowerCase())}">
+          <div class="card-top cat-${r.category || 'primary'}">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+              <div class="card-child-name">${esc(r.childName) || ui[currentLang].unknownChild}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-end;">
+                <span class="c-badge cbadge-${r.category || 'primary'}">${r.category === 'mix' ? 'Rosabella+Primary' : (r.category || 'Primary').charAt(0).toUpperCase() + (r.category || 'primary').slice(1)}</span>
+                ${r.tumaini ? '<span class="c-badge cbadge-tumaini">Tumaini</span>' : ''}
+                ${r.vocation ? `<span class="c-badge cbadge-class">${esc(r.vocation)}</span>` : (r.grade ? `<span class="c-badge cbadge-class">${esc(r.grade)}</span>` : '')}
+              </div>
+            </div>
+            <div class="card-meta" style="margin-top:3px;">${ui[currentLang].report}: ${esc(r.reportDate) || '—'} · ${ui[currentLang].submittedBy}: ${esc(r.staffName) || ui[currentLang].unknown}</div>
+            ${buildSponsorBadge(r, realIdx)}
           </div>
           <div class="card-body">
             <div class="info-row">
               <div class="info-icon">❤️</div>
-              <div>${ui[currentLang].health}
+              <div><span class="info-label">${ui[currentLang].health}</span>
                 <span class="pill ${healthPill(r.healthStatus)}">${esc(r.healthStatus) || '—'}</span></div>
             </div>
             <div class="info-row">
               <div class="info-icon">📚</div>
-              <div>${ui[currentLang].school}
+              <div><span class="info-label">${ui[currentLang].school}</span>
                 <span class="info-val">${esc(r.attendingSchool) || '—'}${r.grade ? ' · ' + esc(r.grade) : ''}${r.schoolRating ? ' · ' + esc(r.schoolRating) + '/5' : ''}</span></div>
             </div>
             <div class="info-row">
               <div class="info-icon">🏡</div>
-              <div>${ui[currentLang].home}
+              <div><span class="info-label">${ui[currentLang].home}</span>
                 <span class="info-val">${esc(r.homeLife) || '—'}${r.caregiver ? ' · ' + esc(r.caregiver) : ''}</span></div>
             </div>
             ${r.goodThing ? `<div class="quote-block"><span class="quote-label">${ui[currentLang].goodThing}</span>${esc(r.goodThing)}</div>` : ''}
           </div>
           <div class="card-foot">
-            <button class="compose-btn" id="composeBtn" onclick="openComposer(${realIdx})">${r.sponsorName && r.sponsorName.split(' / ').length > 1 ? ('\u2709 Skriv til ' + r.sponsorName.split(' / ').length + ' sponsorer') : ui[currentLang].writeTo}</button>
+            <button class="compose-btn" onclick="openComposer(${realIdx})">${r.sponsorName && r.sponsorName.split(' / ').length > 1 ? ('✉ Skriv til ' + r.sponsorName.split(' / ').length + ' sponsorer') : ui[currentLang].writeTo}</button>
           </div>
         </div>`;
-    });
+            });
     html += '</div>';
     area.innerHTML = html;
+    applyFilters();
   }
 
   function esc(s) {
